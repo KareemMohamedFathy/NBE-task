@@ -20,6 +20,8 @@ import {
   FlatList,
 } from 'react-native';
 import MyDefaultTheme from '../../mythemes/MyDefaultTheme';
+import {useSelector} from 'react-redux';
+import strings from '../Language/AuthNames';
 function History() {
   const history = [
     {username: 'Carrefour', img: require('../../assets/Home/carrefour.png')},
@@ -30,6 +32,9 @@ function History() {
   ];
   const styles = useGlobalStyles();
   const localThemes = useTheme();
+  const currentL = useSelector(state => state.counter.value);
+  const en = currentL === 'en';
+
   function renderUserHistory(itemData) {
     return (
       <View
@@ -54,13 +59,13 @@ function History() {
     <>
       <View
         style={{
-          flexDirection: 'row',
+          flexDirection: en ? 'row' : 'row-reverse',
           alignItems: 'center',
           marginTop: 20,
           justifyContent: 'space-between',
         }}>
-        <Text style={[styles.sendmoney]}>History</Text>
-        <Text style={styles.viewall}>View All</Text>
+        <Text style={[styles.sendmoney]}>{strings.history}</Text>
+        <Text style={styles.viewall}>{strings.viewalltransactions}</Text>
       </View>
       <FlatList
         data={history}

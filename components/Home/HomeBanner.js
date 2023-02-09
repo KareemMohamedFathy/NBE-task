@@ -21,12 +21,17 @@ import {
 } from 'react-native';
 import MyDefaultTheme from '../../mythemes/MyDefaultTheme';
 import {useNavigation} from '@react-navigation/native';
+import strings from '../Language/AuthNames';
+import {useSelector} from 'react-redux';
 function HomeBanner() {
   const styles = useGlobalStyles();
   const localThemes = useTheme();
   const navigation = useNavigation();
+  const currentL = useSelector(state => state.counter.value);
+  const en = currentL === 'en';
+
   return (
-    <View style={styles.banner}>
+    <View style={[styles.banner, {flexDirection: en ? 'row' : 'row-reverse'}]}>
       <Pressable onPress={() => navigation.toggleDrawer()}>
         <Image
           source={
@@ -39,7 +44,8 @@ function HomeBanner() {
         source={require('../../assets/Home/profilepic.png')}
         style={styles.profilepic}></Image>
       <Text style={{color: '#B7B7B7'}}>
-        Good Morning {'\n'} <Text style={styles.username}>Ahmad</Text>
+        {strings.goodmorning} {'\n'}{' '}
+        <Text style={styles.username}>{strings.Ahmad}</Text>
       </Text>
       <Image
         source={require('../../assets/Home/notification.png')}

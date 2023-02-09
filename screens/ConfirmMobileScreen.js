@@ -17,23 +17,43 @@ import BackButton from '../components/ui/BackButton';
 import Button from '../components/ui/Button';
 import VerifyText from '../components/ui/VerifyText';
 import MyDefaultTheme from '../mythemes/MyDefaultTheme';
+import {useSelector} from 'react-redux';
+import strings from '../components/Language/AuthNames';
 
 function ConfirmMobileScreen({navigation, route}) {
   const {mobileNum} = route.params ? route.params : '';
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => <BackButton destination={'Register'} />,
-    });
-  }, [navigation]);
   function goToPassword() {
     navigation.navigate('Password');
   }
   const styles = useGlobalStyles();
+  const currentL = useSelector(state => state.counter.value);
+  const en = currentL === 'en';
+  const localThemes = useTheme();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.mobileNum}>Verification</Text>
+      <View
+        style={{
+          flexDirection: en ? 'row' : 'row-reverse',
+          justifyContent: 'space-between',
+        }}>
+        <BackButton destination="Register" />
+        <View>
+          <Image
+            source={
+              localThemes.dark
+                ? require('../assets/darklogo.png')
+                : require('../assets/logogreen.png')
+            }
+            style={{resizeMode: 'cover'}}
+          />
+        </View>
+      </View>
+
+      <Text style={styles.mobileNum}>{strings.verification}</Text>
       <Text style={styles.mobileNumEnter}>
-        Enter 5 digit code we sent to {mobileNum}
+        {strings.enterverification}
+        {mobileNum}
       </Text>
       <View style={{flexDirection: 'row'}}>
         <VerifyText />
@@ -42,14 +62,14 @@ function ConfirmMobileScreen({navigation, route}) {
         <VerifyText />
         <VerifyText />
       </View>
-      <Text style={styles.mobileNumEnter}>Didn’t receive the code?</Text>
+      <Text style={styles.mobileNumEnter}>{strings.nocode}</Text>
       <Text style={[styles.mobileNum, {marginTop: 5}]}>
-        Request new one in 00:12
+        {strings.reqnewcode}
       </Text>
 
       <View
         style={{flexDirection: 'column', marginTop: 'auto', marginBottom: 25}}>
-        <Button onPress={goToPassword}>Submit</Button>
+        <Button onPress={goToPassword}>{strings.submit}</Button>
       </View>
     </View>
   );
@@ -62,12 +82,15 @@ function useGlobalStyles() {
 
   return styles;
 }
+const statusBarHeight = StatusBar.currentHeight;
+
 const firstStyles = props =>
   StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: props.colors.backgroundColor,
       paddingHorizontal: 25,
+      marginTop: statusBarHeight + 5,
     },
 
     mobileNum: {

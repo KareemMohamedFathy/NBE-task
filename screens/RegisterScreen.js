@@ -16,38 +16,59 @@ import {useMemo} from 'react/cjs/react.development';
 import BackButton from '../components/ui/BackButton';
 import Button from '../components/ui/Button';
 import MyDefaultTheme from '../mythemes/MyDefaultTheme';
+import {useSelector} from 'react-redux';
+import strings from '../components/Language/AuthNames';
 
 function RegisterScreen({navigation}) {
+  const currentL = useSelector(state => state.counter.value);
+  const en = currentL === 'en';
+
   const localThemes = useTheme();
   const [mobile, onChangeMobile] = useState('');
   const styles = useGlobalStyles();
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => <BackButton destination={'LogIn'} />,
-    });
-  }, [navigation]);
+
   function goToConfirm() {
     navigation.navigate('ConfirmMobile', {
       mobileNum: mobile,
     });
   }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.mobileNum}>Mobile number</Text>
-      <Text style={styles.mobileNumEnter}>
-        Enter the mobile number registred in the bank
-      </Text>
+      <View
+        style={{
+          flexDirection: en ? 'row' : 'row-reverse',
+          justifyContent: 'space-between',
+        }}>
+        <BackButton destination="LogIn" />
+        <View style={{alignItems: 'flex-end'}}>
+          <Image
+            source={
+              localThemes.dark
+                ? require('../assets/darklogo.png')
+                : require('../assets/logogreen.png')
+            }
+            style={{resizeMode: 'cover'}}
+          />
+        </View>
+      </View>
+      <Text style={styles.mobileNum}>{strings.mobileno}</Text>
+      <Text style={styles.mobileNumEnter}>{strings.mobilenoetner}</Text>
 
-      <View style={styles.password}>
+      <View
+        style={[styles.password, {flexDirection: en ? 'row' : 'row-reverse'}]}>
         <Image
           source={require('../assets/mobile.png')}
           style={{
             marginTop: 'auto',
             marginBottom: 'auto',
-            marginLeft: 24,
+            marginStart: en ? 24 : 0,
+            marginEnd: en ? 0 : 20,
           }}></Image>
-        <View>
-          <Text style={[styles.label, {color: '#007236'}]}>Mobile Number</Text>
+        <View style={{marginHorizontal: 15}}>
+          <Text style={[styles.label, {color: '#007236'}, {}]}>
+            {strings.mobileno}
+          </Text>
           <TextInput
             style={styles.inputpassword}
             onChangeText={onChangeMobile}
@@ -60,12 +81,16 @@ function RegisterScreen({navigation}) {
       </View>
       <View
         style={{flexDirection: 'column', marginTop: 'auto', marginBottom: 25}}>
-        <Button onPress={goToConfirm}>Next</Button>
+        <Button onPress={goToConfirm}>{strings.next}</Button>
         <Text style={styles.footer}>
-          By signing up, you agree to our
-          <Text style={styles.specialfooter}> Terms of Service</Text> and
-          acknowledge that you have read our
-          <Text style={styles.specialfooter}> Privacy Policy</Text>.
+          {strings.termsofservice[0]}
+          <Text style={styles.specialfooter}>
+            {' '}
+            {strings.termsofservice[1]}
+          </Text>{' '}
+          {strings.termsofservice[2]}
+          <Text style={styles.specialfooter}> {strings.termsofservice[3]}</Text>
+          .
         </Text>
       </View>
     </View>
@@ -79,12 +104,15 @@ function useGlobalStyles() {
 
   return styles;
 }
+const statusBarHeight = StatusBar.currentHeight;
+
 const firstStyles = props =>
   StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: props.colors.backgroundColor,
       paddingHorizontal: 25,
+      marginTop: statusBarHeight + 5,
     },
 
     mobileNum: {
@@ -125,20 +153,18 @@ const firstStyles = props =>
       fontSize: 16,
       fontWeight: '400',
       color: props.colors.text,
-      marginLeft: 20,
     },
 
     label: {
       fontSize: 14,
       fontWeight: '700',
       color: 'white',
-      marginLeft: 23,
       marginTop: 11,
     },
     footer: {
       marginTop: 25,
       fontWeight: '400',
-      fontSize: 14,
+      fontSize: 18,
       color: '#808080',
     },
     specialfooter: {

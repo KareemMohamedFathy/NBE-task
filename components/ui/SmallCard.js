@@ -38,7 +38,7 @@ function SmallCard({
 const styles = StyleSheet.create({
   outercontainer: {
     width: '18%',
-    marginRight: 33,
+    marginHorizontal: 13,
   },
   bstyle: {
     borderRadius: 13,

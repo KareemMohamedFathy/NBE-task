@@ -9,22 +9,39 @@ import {
   StatusBar,
   Dimensions,
 } from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
+import strings from '../components/Language/AuthNames';
 import Button from '../components/ui/Button';
+import {changeLanguage} from '../counter/CounterSlice';
 
-function FinishScreen() {
+function FinishScreen({navigation}) {
+  const currentL = useSelector(state => state.counter.value);
+  const en = currentL === 'en';
+  const dispatch = useDispatch();
+
+  function gotoHome() {
+    navigation.navigate('Root');
+  }
+
   return (
     <View style={styles.container}>
-      <Image source={require('../assets/logo.png')} style={styles.logo}></Image>
+      <View style={{flexDirection: en ? 'row-reverse' : 'row'}}>
+        <Image
+          source={require('../assets/logo.png')}
+          style={styles.logo}></Image>
+      </View>
       <View style={{flex: 1}}>
         <ImageBackground
           source={require('../assets/finished.png')}
           style={styles.rootScreen}
           imageStyle={styles.backgroundImage}>
           <View style={{paddingHorizontal: 25, flex: 1}}>
-            <Text style={styles.cong}>Congratulations</Text>
+            <Text style={[styles.cong, {marginEnd: en ? 0 : 10}]}>
+              {strings.congratulations}
+            </Text>
 
-            <Text style={[styles.cong, {fontSize: 16, fontWeight: '400'}]}>
-              You have successfully registered in NBE online banking service
+            <Text style={[styles.cong, {fontSize: 17, fontWeight: '400'}]}>
+              {strings.finishedregister}
             </Text>
             <View
               style={{
@@ -34,8 +51,9 @@ function FinishScreen() {
               }}>
               <Button
                 bstyle={{backgroundColor: 'white'}}
-                textstyle={{color: '#007236'}}>
-                Finish
+                textstyle={{color: '#007236'}}
+                onPress={gotoHome}>
+                {strings.finish}
               </Button>
             </View>
           </View>
@@ -58,9 +76,10 @@ const styles = StyleSheet.create({
     resizeMode: 'stretch',
   },
   logo: {
-    marginLeft: 'auto',
     marginTop: 16,
+    paddingHorizontal: 20,
     marginBottom: 16,
+    marginHorizontal: 20,
   },
   cong: {
     fontFamily: 'Roboto',

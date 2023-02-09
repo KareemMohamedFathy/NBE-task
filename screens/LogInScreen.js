@@ -9,16 +9,25 @@ import {
   StatusBar,
   Modal,
   TouchableOpacity,
+  I18nManager,
+  Alert,
+  DevSettings,
 } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
-import {useState} from 'react';
+import strings from '../components/Language/AuthNames';
+import {useEffect, useState} from 'react';
 import Button from '../components/ui/Button';
 import AppModal from '../components/AppModal';
 import {BlurView} from '@react-native-community/blur';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@react-navigation/native';
+import {useDispatch, useSelector} from 'react-redux';
+import {changeLanguage} from '../counter/CounterSlice';
 
 function LogInScreen({navigation}) {
+  const currentL = useSelector(state => state.counter.value);
+  const en = currentL === 'en';
+  const dispatch = useDispatch();
   const [email, onChangeEmail] = useState('');
   const [password, onChangePassword] = useState('');
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
@@ -39,6 +48,10 @@ function LogInScreen({navigation}) {
   function gotoHome() {
     navigation.navigate('Root');
   }
+  function changeL() {
+    dispatch(changeLanguage());
+  }
+
   return (
     <View style={styles.container}>
       {/* <StatusBar translucent={true} backgroundColor="transparent" /> */}
@@ -49,8 +62,11 @@ function LogInScreen({navigation}) {
         imageStyle={styles.backgroundImage}>
         <View style={[styles.outercontainer, {backgroundColor: bgColor}]}>
           <View style={styles.innercontainer}>
-            <Button bstyle={styles.language} textstyle={styles.text}>
-              EN
+            <Button
+              bstyle={styles.language}
+              textstyle={styles.text}
+              onPress={changeL}>
+              {strings.language}
             </Button>
             <Image
               source={require('../assets/logo.png')}
@@ -58,44 +74,56 @@ function LogInScreen({navigation}) {
           </View>
           <View style={styles.appheader}>
             <Text style={styles.header}>
-              Welcome to {'\n'}the national bank of Egypt
+              {strings.welcome} {'\n'}
             </Text>
           </View>
           <View style={[styles.form]}>
-            <View style={styles.email}>
+            <View
+              style={[
+                styles.email,
+                {flexDirection: en ? 'row' : 'row-reverse'},
+              ]}>
               <Image
                 source={require('../assets/@.png')}
                 style={{
                   marginTop: 'auto',
                   marginBottom: 'auto',
-                  marginLeft: 24,
+                  marginStart: en ? 24 : 5,
+                  marginEnd: en ? 0 : 24,
                 }}></Image>
-              <View>
-                <Text style={styles.label}>UserName</Text>
+              <View style={{flex: 1}}>
+                <Text style={styles.label}>{strings.userName}</Text>
                 <TextInput
                   style={styles.inputemail}
                   onChangeText={onChangeEmail}
                   value={email}
-                  placeholder="Enter  user name"
+                  placeholder={strings.userPlaceHolder}
                   placeholderTextColor={'white'}
                 />
               </View>
             </View>
-            <View style={styles.password}>
+            <View
+              style={[
+                styles.password,
+                {flexDirection: en ? 'row' : 'row-reverse'},
+              ]}>
               <Image
                 source={require('../assets/lock.png')}
                 style={{
                   marginTop: 'auto',
                   marginBottom: 'auto',
-                  marginLeft: 24,
+                  marginStart: en ? 24 : 5,
+                  marginEnd: en ? 0 : 24,
                 }}></Image>
-              <View>
-                <Text style={[styles.label, {color: '#007236'}]}>Password</Text>
+              <View style={{flex: 1}}>
+                <Text style={[styles.label, {color: '#007236'}]}>
+                  {strings.password}
+                </Text>
                 <TextInput
                   style={styles.inputpassword}
                   onChangeText={onChangePassword}
                   value={password}
-                  placeholder="Enter  password"
+                  placeholder={strings.passwordPlaceHolder}
                   placeholderTextColor={'black'}
                 />
               </View>
@@ -104,7 +132,7 @@ function LogInScreen({navigation}) {
           <View style={{flex: 1}}>
             <View
               style={{
-                flexDirection: 'row',
+                flexDirection: en ? 'row' : 'row-reverse',
                 marginLeft: 20,
                 marginTop: 15,
                 alignItems: 'center',
@@ -114,17 +142,21 @@ function LogInScreen({navigation}) {
                 value={toggleCheckBox}
                 onValueChange={newValue => setToggleCheckBox(newValue)}
               />
-              <Text style={[styles.label, {marginLeft: 0, marginTop: 0}]}>
-                Remember Me
+              <Text
+                style={[
+                  styles.label,
+                  {marginStart: 0, marginTop: 0, marginEnd: 0},
+                ]}>
+                {strings.Rememberme}
               </Text>
               <Text
                 style={{marginLeft: 'auto', color: 'white', marginRight: 25}}>
-                Forgot password?
+                {strings.Forgotpassword}
               </Text>
             </View>
             <View
               style={{
-                flexDirection: 'row',
+                flexDirection: en ? 'row' : 'row-reverse',
                 marginLeft: 20,
                 marginTop: 20,
                 alignItems: 'center',
@@ -135,9 +167,9 @@ function LogInScreen({navigation}) {
                 bstyle={styles.login}
                 onPress={gotoHome}
                 textstyle={[
-                  {textAlign: 'center', color: 'white', fontSize: 16},
+                  {textAlign: 'center', color: 'white', fontSize: 18},
                 ]}>
-                Log In
+                {strings.LogIn}
               </Button>
               <Pressable onPress={setModal} style={{}}>
                 <Image
@@ -147,11 +179,11 @@ function LogInScreen({navigation}) {
             </View>
             <View style={{alignItems: 'center', marginTop: 15}}>
               <Pressable onPress={gotoRegister}>
-                <Text style={{fontSize: 14, color: 'white'}}>
-                  Don't have an account?{' '}
+                <Text style={{fontSize: 18, color: 'white'}}>
+                  {strings.noAccount}{' '}
                   <Text
                     style={{color: '#F6A721', textDecorationLine: 'underline'}}>
-                    Sign up
+                    {strings.signUp}
                   </Text>
                 </Text>
               </Pressable>
@@ -159,14 +191,15 @@ function LogInScreen({navigation}) {
           </View>
           <View style={styles.bbanner}>
             <View style={styles.contact}>
-              <Text style={{fontSize: 14, color: '#F6A721', marginTop: 16}}>
+              <Text style={{fontSize: 16, color: '#F6A721', marginTop: 16}}>
                 {' '}
-                Contact Us <Text style={{color: 'white'}}>-</Text> FAQs{' '}
-                <Text style={{color: 'white'}}>-</Text> Help
+                {strings.contactUs} <Text style={{color: 'white'}}>-</Text>{' '}
+                {strings.faqs} <Text style={{color: 'white'}}>-</Text>{' '}
+                {strings.help}
               </Text>
             </View>
-            <Text style={{fontSize: 10, color: 'white', marginTop: 8}}>
-              Copyright © NBE 2021 All Rights Reserved - National Bank of Egypt
+            <Text style={{fontSize: 13, color: 'white', marginTop: 8}}>
+              {strings.copyright}
             </Text>
           </View>
         </View>
@@ -192,12 +225,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   outercontainer: {
-    flex: 3,
-    paddingTop: statusBarHeight,
+    flex: 10,
+    paddingTop: statusBarHeight + 5,
+    paddingHorizontal: 25,
   },
   start: {
     marginTop: 40,
-    fontSize: 50,
+    fontSize: 55,
   },
   absolute: {
     backgroundColor: 'rgba(28, 36, 55, 0.77)',
@@ -223,23 +257,21 @@ const styles = StyleSheet.create({
   },
   text: {
     color: '#007236',
-    fontSize: 20,
+    fontSize: 24,
 
     fontWeight: '500',
   },
   innercontainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginHorizontal: 16,
     marginTop: 16,
   },
 
   appheader: {
-    minHeight: '40%',
+    minHeight: '35%',
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'column',
-    marginHorizontal: 30,
   },
   header: {
     fontSize: 40,
@@ -249,28 +281,29 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   form: {
-    marginHorizontal: 25,
+    flex: 1,
   },
   email: {
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     flexDirection: 'row',
     borderRadius: 10,
     borderWidth: 1.5,
-    height: 65,
+    flex: 1,
+    minWidth: '100%',
     borderColor: 'rgba(255, 255, 255, 0.5)',
     alignItems: 'center',
   },
   label: {
-    fontSize: 14,
+    fontSize: 16,
     color: 'white',
-    marginLeft: 23,
+    marginHorizontal: 23,
     marginTop: 11,
   },
   inputemail: {
     fontSize: 16,
     fontWeight: '400',
     color: 'white',
-    marginLeft: 20,
+    marginStart: 20,
   },
   password: {
     marginTop: 20,
@@ -292,7 +325,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '400',
     color: 'black',
-    marginLeft: 20,
+    marginStart: 20,
   },
   login: {
     backgroundColor: '#007236',
@@ -306,6 +339,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
     flex: 0.45,
     marginTop: 20,
+    marginHorizontal: -25,
   },
   contact: {
     flexDirection: 'row',

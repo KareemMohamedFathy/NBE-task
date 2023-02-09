@@ -16,11 +16,15 @@ import {
 import Modal from 'react-native-modal';
 import Button from './ui/Button';
 import MyDefaultTheme from '../mythemes/MyDefaultTheme';
+import strings from './Language/AuthNames';
+import {useSelector} from 'react-redux';
 
 function HomeModal(props) {
   const a = props.modalon;
   const styles = useGlobalStyles();
   const localThemes = useTheme();
+  const currentL = useSelector(state => state.counter.value);
+  const en = currentL === 'en';
 
   return (
     <Modal
@@ -29,8 +33,9 @@ function HomeModal(props) {
       statusBarTranslucent={true}
       style={{margin: 0}}>
       <View style={styles.container}>
-        <Text style={styles.header}>Fingerprint for NBE Mobile</Text>
-        <Text style={styles.subheader}>Log in with your fingerprint</Text>
+        <Text style={styles.header}>{strings.fingerPrint}</Text>
+        <Text style={styles.subheader}>{strings.fingerPrintLogin}</Text>
+
         <Pressable onPress={props.onSecure}>
           <Image
             source={
@@ -40,9 +45,14 @@ function HomeModal(props) {
             }
             style={styles.fingerprint}></Image>
         </Pressable>
-        <Text style={styles.footer}>Touch the fingerprint sensor</Text>
-        <Pressable onPress={props.onPress}>
-          <Text style={styles.cancel}>Cancel</Text>
+        <Text style={styles.footer}>{strings.touch}</Text>
+
+        <Pressable
+          onPress={props.onPress}
+          style={{flex: 1, flexDirection: en ? 'row' : 'row-reverse'}}>
+          <Text style={[styles.cancel, {flexDirection: 'row-reverse'}]}>
+            {strings.cancel}
+          </Text>
         </Pressable>
       </View>
     </Modal>
@@ -63,14 +73,12 @@ const styles = props =>
       color: props.colors.text,
       fontWeight: '700',
       fontSize: 20,
-      marginStart: 18,
     },
     subheader: {
       marginTop: 12,
       color: props.colors.text,
       fontWeight: '400',
       fontSize: 14,
-      marginStart: 18,
     },
     fingerprint: {
       marginStart: 'auto',
@@ -88,7 +96,6 @@ const styles = props =>
       fontSize: 16,
       fontWeight: '700',
       marginStart: 'auto',
-      marginEnd: 44,
       marginTop: 8,
     },
     container: {
@@ -98,6 +105,7 @@ const styles = props =>
       flex: 1,
       marginTop: 'auto',
       borderRadius: 18,
+      paddingHorizontal: 25,
     },
   });
 export default HomeModal;

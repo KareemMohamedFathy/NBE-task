@@ -30,8 +30,13 @@ import AppModal from '../components/AppModal';
 import HomeModal from '../components/HomeModal';
 import HomeBanner from '../components/Home/HomeBanner';
 import History from '../components/Home/History';
+import {useSelector} from 'react-redux';
+import strings from '../components/Language/AuthNames';
 
 function HomeScreen({navigation, route}) {
+  const currentL = useSelector(state => state.counter.value);
+  const en = currentL === 'en';
+
   const users = [
     {username: 'Hala', img: require('../assets/Home/hala.png')},
     {username: 'Ayman', img: require('../assets/Home/ayman.png')},
@@ -42,10 +47,14 @@ function HomeScreen({navigation, route}) {
   const isFocused = useIsFocused();
   const [visible, setVisible] = useState(false);
   const [mybalance, setMybalance] = useState('Press here to show balance');
+  const [fingerprintV, setFingerPrintV] = useState(false);
+
   const styles = useGlobalStyles();
   const localThemes = useTheme();
   function goToCardsScreen() {
-    navigation.navigate('Home', {screen: 'Cards'});
+    console.log('whu');
+
+    navigation.navigate(strings.cards);
   }
 
   function isVisible() {
@@ -56,6 +65,7 @@ function HomeScreen({navigation, route}) {
   }
   function getFingerPrint() {
     setMybalance('$2,374,654.25');
+    setFingerPrintV(true);
     setVisible(!visible);
   }
   useLayoutEffect(() => {
@@ -88,19 +98,29 @@ function HomeScreen({navigation, route}) {
           <ImageBackground
             source={require('../assets/Home/test.png')}
             style={{paddingBottom: 40}}>
-            <View style={styles.balanceheader}>
-              <Text style={{color: 'white'}}>Balance</Text>
+            <View
+              style={[
+                styles.balanceheader,
+                {flexDirection: en ? 'row' : 'row-reverse'},
+              ]}>
+              <Text style={{color: 'white'}}>{strings.balance}</Text>
               <Image
                 source={require('../assets/Home/smallfingerprint.png')}
                 style={{marginStart: 'auto'}}></Image>
             </View>
             <View style={styles.showbalance}>
-              <Text style={styles.showbalancetext}>{mybalance}</Text>
+              <Text style={styles.showbalancetext}>
+                {fingerprintV ? mybalance : strings.showbalance}
+              </Text>
             </View>
           </ImageBackground>
         </View>
       </Pressable>
-      <View style={styles.manageacoount}>
+      <View
+        style={[
+          styles.manageacoount,
+          {flexDirection: en ? 'row' : 'row-reverse'},
+        ]}>
         <SmallCard
           bstyle={{
             backgroundColor: '#00C97426',
@@ -108,7 +128,7 @@ function HomeScreen({navigation, route}) {
             marginTop: 25,
           }}
           imagepath={require('../assets/Home/accounts.png')}
-          outertext={'Accounts'}></SmallCard>
+          outertext={strings.accounts}></SmallCard>
         <SmallCard
           onPress={goToCardsScreen}
           bstyle={{
@@ -117,7 +137,7 @@ function HomeScreen({navigation, route}) {
             marginTop: 25,
           }}
           imagepath={require('../assets/Home/cards.png')}
-          outertext={'Cards'}></SmallCard>
+          outertext={strings.cards}></SmallCard>
 
         <SmallCard
           bstyle={{
@@ -126,7 +146,7 @@ function HomeScreen({navigation, route}) {
             marginTop: 25,
           }}
           imagepath={require('../assets/Home/utilities.png')}
-          outertext={'Utilities'}></SmallCard>
+          outertext={strings.utilities}></SmallCard>
 
         <SmallCard
           bstyle={{
@@ -135,17 +155,18 @@ function HomeScreen({navigation, route}) {
             marginTop: 25,
           }}
           imagepath={require('../assets/Home/history.png')}
-          outertext={'History'}></SmallCard>
+          outertext={strings.history}></SmallCard>
       </View>
       <View
         style={{
-          flexDirection: 'row',
+          flexDirection: en ? 'row' : 'row-reverse',
+
           alignItems: 'center',
           marginTop: 25,
           justifyContent: 'space-between',
         }}>
-        <Text style={styles.sendmoney}>Send money</Text>
-        <Text style={styles.viewall}>View All</Text>
+        <Text style={styles.sendmoney}>{strings.sendmoney}</Text>
+        <Text style={styles.viewall}>{strings.viewallusers}</Text>
       </View>
       <View style={{}}>
         <FlatList
@@ -153,6 +174,7 @@ function HomeScreen({navigation, route}) {
           renderItem={renderUsersItem}
           keyExtractor={item => item.username}
           horizontal={true}
+          inverted={en ? false : true}
           style={{}}
         />
       </View>

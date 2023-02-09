@@ -1,12 +1,17 @@
 import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import {GlobalStyles} from '../../constants/styles';
 
-function Button({children, onPress, bstyle, textstyle, img}) {
+function ButtonWithImg({children, onPress, bstyle, textstyle, img}) {
   return (
     <View style={[styles.bstyle, bstyle]}>
       <Pressable onPress={onPress}>
-        <View style={{}}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
           <Text style={[styles.textstyle, textstyle]}>{children}</Text>
+          <Image source={img} style={{marginStart: 10}} />
         </View>
       </Pressable>
     </View>
@@ -19,11 +24,12 @@ const styles = StyleSheet.create({
     borderRadius: 13,
   },
   textstyle: {
-    textAlign: 'center',
+    marginStart: 'auto',
+    marginEnd: 'auto',
     color: 'white',
     fontSize: 16,
     fontWeight: '700',
   },
 });
 
-export default Button;
+export default ButtonWithImg;
