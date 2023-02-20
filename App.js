@@ -42,6 +42,9 @@ import {Switch} from 'react-native-gesture-handler';
 import {store} from './store';
 import strings from './components/Language/AuthNames';
 import {changeLanguage} from './counter/CounterSlice';
+import SplashScreen from './screens/SplashScreen';
+import {black} from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
+import AddBeneficiariesScreen from './screens/AddBeneficiariesScreen';
 const Drawer = createDrawerNavigator();
 
 function App() {
@@ -62,8 +65,12 @@ function App() {
       <View
         style={{
           backgroundColor: !focused
-            ? 'rgba(0,114,54, 0.2)'
-            : 'rgba(0,114,54, 0.1)',
+            ? dark
+              ? 'rgba(0,114,54, 0.2)'
+              : 'rgba(0,0,0,0.2)'
+            : dark
+            ? 'rgba(0,114,54, 0.1)'
+            : 'rgba(255,255,255,0.2)',
           padding: 10,
           borderRadius: 10,
         }}>
@@ -72,7 +79,13 @@ function App() {
             source={path}
             resizeMode="contain"
             style={{
-              tintColor: !focused ? 'white' : '#007236',
+              tintColor: !focused
+                ? dark
+                  ? 'white'
+                  : '#1B1B1B'
+                : dark
+                ? '#007236'
+                : '#FFFFFF',
             }}
           />
         </View>
@@ -94,17 +107,19 @@ function App() {
             backgroundColor: dark ? '#151A21' : '#FFFFFF',
           },
           tabBarItemStyle: {
-            backgroundColor: dark ? '#202933' : '#F1F3FB',
-            margin: 3,
+            margin: 2,
             borderRadius: 22,
           },
 
           tabBarLabelStyle: {
             textAlign: 'center',
             marginBottom: 8,
-            color: '#FFFFFF',
-            fontSize: 11,
+            color: dark ? '#FFFFFF' : '#B7B7B7',
+            fontSize: 13,
           },
+          tabBarActiveTintColor: 'white',
+          tabBarActiveBackgroundColor: '#007236',
+          tabBarInactiveBackgroundColor: !dark ? '#F1F3FB' : '#202933',
         }}>
         <Tab.Screen
           name={strings.home}
@@ -114,7 +129,8 @@ function App() {
             tabBarIcon: ({focused}) => (
               <Image
                 source={require('./assets/Home/home.png')}
-                style={styles.logo}></Image>
+                style={styles.logo}
+                tintColor={!focused ? '#B7B7B7' : '#FFFFFF'}></Image>
             ),
           }}
         />
@@ -123,22 +139,24 @@ function App() {
           component={TransferScreen}
           options={{
             headerShown: false,
-            tabBarIcon: () => (
+            tabBarIcon: ({focused}) => (
               <Image
                 source={require('./assets/Home/transfers.png')}
-                style={styles.logo}></Image>
+                style={styles.logo}
+                tintColor={!focused ? '#B7B7B7' : '#FFFFFF'}></Image>
             ),
           }}
         />
         <Tab.Screen
           name={strings.beneficiaries}
-          component={BeneficiariesScreen}
+          component={MyBeneficiaries}
           options={{
             headerShown: false,
-            tabBarIcon: () => (
+            tabBarIcon: ({focused}) => (
               <Image
                 source={require('./assets/Home/Beneficiaries.png')}
-                style={styles.logo}></Image>
+                style={styles.logo}
+                tintColor={!focused ? '#B7B7B7' : '#FFFFFF'}></Image>
             ),
           }}
         />
@@ -147,10 +165,11 @@ function App() {
           component={AtmScreen}
           options={{
             headerShown: false,
-            tabBarIcon: () => (
+            tabBarIcon: ({focused}) => (
               <Image
                 source={require('./assets/Home/atms.png')}
-                style={styles.logo}></Image>
+                style={styles.logo}
+                tintColor={!focused ? '#B7B7B7' : '#FFFFFF'}></Image>
             ),
           }}
         />
@@ -159,14 +178,32 @@ function App() {
           component={AirPayScreen}
           options={{
             headerShown: false,
-            tabBarIcon: () => (
+
+            tabBarIcon: ({focused}) => (
               <Image
                 source={require('./assets/Home/airpay.png')}
-                style={styles.logo}></Image>
+                style={styles.logo}
+                tintColor={!focused ? 'B7B7B7' : '#FFFFFF'}></Image>
             ),
           }}
         />
       </Tab.Navigator>
+    );
+  }
+  function MyBeneficiaries() {
+    return (
+      <Stack.Navigator>
+        <Stack.Screen
+          name={'MyBeneficiaries'}
+          component={BeneficiariesScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name={'AddBeneficiaries'}
+          component={AddBeneficiariesScreen}
+          options={{headerShown: false}}
+        />
+      </Stack.Navigator>
     );
   }
   function MyARTabs() {
@@ -184,27 +221,29 @@ function App() {
             backgroundColor: dark ? '#151A21' : '#FFFFFF',
           },
           tabBarItemStyle: {
-            backgroundColor: dark ? '#202933' : '#F1F3FB',
-            margin: 3,
+            margin: 2,
             borderRadius: 22,
           },
 
           tabBarLabelStyle: {
             textAlign: 'center',
             marginBottom: 8,
-            color: '#FFFFFF',
-            fontSize: 11,
+            color: dark ? '#FFFFFF' : '#B7B7B7',
+            fontSize: 13,
           },
+          tabBarActiveBackgroundColor: '#007236',
+          tabBarInactiveBackgroundColor: !dark ? '#F1F3FB' : '#202933',
         }}>
         <Tab.Screen
           name={strings.airpay}
           component={AirPayScreen}
           options={{
             headerShown: false,
-            tabBarIcon: () => (
+            tabBarIcon: ({focused}) => (
               <Image
                 source={require('./assets/Home/airpay.png')}
-                style={styles.logo}></Image>
+                style={styles.logo}
+                tintColor={!focused ? '#B7B7B7' : '#FFFFFF'}></Image>
             ),
           }}
         />
@@ -214,22 +253,24 @@ function App() {
           component={AtmScreen}
           options={{
             headerShown: false,
-            tabBarIcon: () => (
+            tabBarIcon: ({focused}) => (
               <Image
                 source={require('./assets/Home/atms.png')}
-                style={styles.logo}></Image>
+                style={styles.logo}
+                tintColor={!focused ? '#B7B7B7' : '#FFFFFF'}></Image>
             ),
           }}
         />
         <Tab.Screen
           name={strings.beneficiaries}
-          component={BeneficiariesScreen}
+          component={MyBeneficiaries}
           options={{
             headerShown: false,
-            tabBarIcon: () => (
+            tabBarIcon: ({focused}) => (
               <Image
                 source={require('./assets/Home/Beneficiaries.png')}
-                style={styles.logo}></Image>
+                style={styles.logo}
+                tintColor={!focused ? '#B7B7B7' : '#FFFFFF'}></Image>
             ),
           }}
         />
@@ -239,10 +280,11 @@ function App() {
           component={TransferScreen}
           options={{
             headerShown: false,
-            tabBarIcon: () => (
+            tabBarIcon: ({focused}) => (
               <Image
                 source={require('./assets/Home/transfers.png')}
-                style={styles.logo}></Image>
+                style={styles.logo}
+                tintColor={!focused ? '#B7B7B7' : '#FFFFFF'}></Image>
             ),
           }}
         />
@@ -255,7 +297,8 @@ function App() {
             tabBarIcon: ({focused}) => (
               <Image
                 source={require('./assets/Home/home.png')}
-                style={styles.logo}></Image>
+                style={styles.logo}
+                tintColor={!focused ? '#B7B7B7' : '#FFFFFF'}></Image>
             ),
           }}
         />
@@ -278,14 +321,12 @@ function App() {
       </HomeStack.Navigator>
     );
   }
-  function changeL() {}
+
   // We only want to recompute the stylesheet on changes incolor.
   const CustomDrawerContent = props => {
     const currentL = useSelector(state => state.counter.value);
     const en = currentL === 'en';
     const dispatch = useDispatch();
-
-    console.log(currentL);
 
     return (
       <>
@@ -348,7 +389,7 @@ function App() {
                       fontWeight: '500',
                       marginEnd: en ? 0 : 8,
                       marginStart: en ? 8 : 0,
-                      color: focused ? '#007236' : '#FFFFFF',
+                      color: dark ? '#FFFFFF' : '#1B1B1B',
                     }}>
                     {strings.darkmode}
                   </Text>
@@ -376,7 +417,7 @@ function App() {
                   style={{
                     backgroundColor: dark
                       ? 'rgba(255, 0, 0, 0.2);'
-                      : '#E1072133)',
+                      : '#E1072133',
                     padding: 10,
                     borderRadius: 10,
                   }}>
@@ -396,8 +437,8 @@ function App() {
                     fontSize: 16,
                     fontWeight: '500',
                     color: '#FF0000',
-                    marginStart: en ? 5 : 0,
-                    marginEnd: en ? 0 : 5,
+                    marginStart: en ? 7 : 0,
+                    marginEnd: en ? 0 : 7,
                   }}>
                   {strings.logout}
                 </Text>
@@ -418,7 +459,10 @@ function App() {
             marginBottom: 20,
             marginTop: 15,
             alignItems: 'center',
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+
+            backgroundColor: dark
+              ? 'rgba(255, 255, 255, 0.1)'
+              : 'rgba(255, 255, 255, 1)',
           }}>
           <Image
             source={require('./assets/drawer/user.png')}
@@ -427,10 +471,15 @@ function App() {
           />
 
           <View style={{marginStart: en ? 8 : 0, marginEnd: en ? 0 : 8}}>
-            <Text style={{color: '#FFFFFF', marginBottom: 2, fontSize: 18}}>
+            <Text
+              style={{
+                color: dark ? '#FFFFFF' : '#1B1B1B',
+                marginBottom: 2,
+                fontSize: 18,
+              }}>
               Ahmad Sami
             </Text>
-            <Text style={{color: '#BABABA', fontSize: 14}}>
+            <Text style={{color: dark ? '#BABABA' : '#4D4D4D', fontSize: 14}}>
               +20 101 131 5412
             </Text>
           </View>
@@ -446,7 +495,6 @@ function App() {
 
   function Root() {
     const currentL = useSelector(state => state.counter.value);
-    console.log(currentL);
     const en = currentL === 'en';
 
     return (
@@ -497,7 +545,13 @@ function App() {
                     fontWeight: '500',
                     marginEnd: en ? 0 : 8,
                     marginStart: en ? 8 : 0,
-                    color: focused ? '#007236' : '#FFFFFF',
+                    color: focused
+                      ? dark
+                        ? '#007236'
+                        : '#FFFFFF'
+                      : dark
+                      ? '#FFFFFF'
+                      : '#1B1B1B',
                   }}>
                   {strings.accountsummary}
                 </Text>
@@ -528,7 +582,13 @@ function App() {
                     fontWeight: '500',
                     marginEnd: en ? 0 : 8,
                     marginStart: en ? 8 : 0,
-                    color: focused ? '#007236' : '#FFFFFF',
+                    color: focused
+                      ? dark
+                        ? '#007236'
+                        : '#FFFFFF'
+                      : dark
+                      ? '#FFFFFF'
+                      : '#1B1B1B',
                   }}>
                   {strings.certificates}
                 </Text>
@@ -560,7 +620,13 @@ function App() {
                     fontWeight: '500',
                     marginEnd: en ? 0 : 8,
                     marginStart: en ? 8 : 0,
-                    color: focused ? '#007236' : '#FFFFFF',
+                    color: focused
+                      ? dark
+                        ? '#007236'
+                        : '#FFFFFF'
+                      : dark
+                      ? '#FFFFFF'
+                      : '#1B1B1B',
                   }}>
                   {strings.payment}
                 </Text>
@@ -592,7 +658,13 @@ function App() {
                     fontWeight: '500',
                     marginEnd: en ? 0 : 8,
                     marginStart: en ? 8 : 0,
-                    color: focused ? '#007236' : '#FFFFFF',
+                    color: focused
+                      ? dark
+                        ? '#007236'
+                        : '#FFFFFF'
+                      : dark
+                      ? '#FFFFFF'
+                      : '#1B1B1B',
                   }}>
                   {strings.cardservices}
                 </Text>
@@ -624,7 +696,13 @@ function App() {
                     fontWeight: '500',
                     marginEnd: en ? 0 : 8,
                     marginStart: en ? 8 : 0,
-                    color: focused ? '#007236' : '#FFFFFF',
+                    color: focused
+                      ? dark
+                        ? '#007236'
+                        : '#FFFFFF'
+                      : dark
+                      ? '#FFFFFF'
+                      : '#1B1B1B',
                   }}>
                   {strings.hardtoken}
                 </Text>
@@ -656,7 +734,13 @@ function App() {
                     fontWeight: '500',
                     marginEnd: en ? 0 : 8,
                     marginStart: en ? 8 : 0,
-                    color: focused ? '#007236' : '#FFFFFF',
+                    color: focused
+                      ? dark
+                        ? '#007236'
+                        : '#FFFFFF'
+                      : dark
+                      ? '#FFFFFF'
+                      : '#1B1B1B',
                   }}>
                   {strings.offers}
                 </Text>
@@ -688,7 +772,13 @@ function App() {
                     fontWeight: '500',
                     marginEnd: en ? 0 : 8,
                     marginStart: en ? 8 : 0,
-                    color: focused ? '#007236' : '#FFFFFF',
+                    color: focused
+                      ? dark
+                        ? '#007236'
+                        : '#FFFFFF'
+                      : dark
+                      ? '#FFFFFF'
+                      : '#1B1B1B',
                   }}>
                   {strings.customerservice}
                 </Text>
@@ -720,7 +810,13 @@ function App() {
                     fontWeight: '500',
                     marginEnd: en ? 0 : 8,
                     marginStart: en ? 8 : 0,
-                    color: focused ? '#007236' : '#FFFFFF',
+                    color: focused
+                      ? dark
+                        ? '#007236'
+                        : '#FFFFFF'
+                      : dark
+                      ? '#FFFFFF'
+                      : '#1B1B1B',
                   }}>
                   {strings.calculators}
                 </Text>
@@ -736,7 +832,12 @@ function App() {
       <NavigationContainer
         theme={scheme === 'dark' ? MyDarkTheme : MyDefaultTheme}>
         <StatusBar backgroundColor="transparent" translucent={true} />
-        <Stack.Navigator initialRouteName="LogIn">
+        <Stack.Navigator initialRouteName="Splash">
+          <Stack.Screen
+            name="Splash"
+            component={SplashScreen}
+            options={{headerShown: false}}
+          />
           <Stack.Screen
             name="LogIn"
             component={LogInScreen}

@@ -20,18 +20,38 @@ import MyDarkTheme from '../mythemes/MyDarkTheme';
 import MyDefaultTheme from '../mythemes/MyDefaultTheme';
 import {useSelector} from 'react-redux';
 import strings from '../components/Language/AuthNames';
-
+import auth from '@react-native-firebase/auth';
 function PasswordScreen({navigation}) {
   const [password, onChangePassword] = useState('');
   const [confirmPassword, onChangeconfirmPassword] = useState('');
+
+  const [passwordSecure, onChangePasswordSecure] = useState(true);
+  const [confirmPasswordSecure, onChangeConfirmPasswordSecure] = useState(true);
 
   const [hasLowerCase, sethasLowerCase] = useState(false);
   const [hasUpperCase, sethasUpperCase] = useState(false);
   const [hasEight, sethasEight] = useState(false);
   const [hasNumber, sethasNumber] = useState(false);
   const [hasSpecialCharacter, sethasSpecialCharacter] = useState(false);
-  const [isPasswordSecure, setIsPasswordSecure] = useState(true);
+  function signUp(password) {
+    auth()
+      .createUserWithEmailAndPassword(phoneno + '@nbe.com', password)
+      .then(() => {
+        console.log('User account created & signed in!');
+        navigation.navigate('Finished');
+      })
+      .catch(error => {
+        if (error.code === 'auth/email-already-in-use') {
+          console.log('That email address is already in use!');
+        }
 
+        if (error.code === 'auth/invalid-email') {
+          console.log('That email address is invalid!');
+        }
+
+        console.error(error);
+      });
+  }
   var format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -54,7 +74,7 @@ function PasswordScreen({navigation}) {
     ) {
       Alert.alert("You don't meet the password criteria");
     } else {
-      navigation.navigate('Finished');
+      signUp(password);
     }
   }
   useEffect(() => {
@@ -84,8 +104,23 @@ function PasswordScreen({navigation}) {
   const {dark} = useTheme();
   const currentL = useSelector(state => state.counter.value);
   const en = currentL === 'en';
+  const phoneno = useSelector(state => state.counter.phoneno);
   const localThemes = useTheme();
+  const [isInputFocused, setIsInputFocused] = useState({
+    password: false,
+    confirmpassword: false,
+  });
 
+  const handleInputFocus = textinput => {
+    setIsInputFocused({
+      [textinput]: true,
+    });
+  };
+  const handleInputBlur = textinput => {
+    setIsInputFocused({
+      [textinput]: false,
+    });
+  };
   return (
     <View style={styles.container}>
       <View
@@ -110,7 +145,15 @@ function PasswordScreen({navigation}) {
       <Text style={styles.mobileNumEnter}>{strings.enterpassword}</Text>
 
       <View
-        style={[styles.password, {flexDirection: en ? 'row' : 'row-reverse'}]}>
+        style={
+          isInputFocused.password
+            ? [
+                styles.password,
+                {flexDirection: en ? 'row' : 'row-reverse'},
+                {backgroundColor: 'white', borderColor: '#007236'},
+              ]
+            : [styles.password, , {flexDirection: en ? 'row' : 'row-reverse'}]
+        }>
         <Image
           source={require('../assets/lock.png')}
           style={{
@@ -125,7 +168,10 @@ function PasswordScreen({navigation}) {
             marginStart: en ? 20 : 0,
             marginEnd: en ? 0 : 20,
           }}>
-          <Text style={[styles.label, {color: '#007236'}]}>
+          <Text
+            style={
+              isInputFocused.password ? [styles.labelfocused] : [styles.label]
+            }>
             {strings.password}
           </Text>
           <View
@@ -138,21 +184,36 @@ function PasswordScreen({navigation}) {
               onChangeText={onChangePassword}
               value={password}
               placeholder={strings.setpassword}
-              secureTextEntry
+              onBlur={() => handleInputBlur('password')}
+              onFocus={() => handleInputFocus('password')}
+              secureTextEntry={passwordSecure}
               placeholderTextColor={!dark ? 'black' : '#B7B7B7'}
             />
-            <Image
-              source={require('../assets/closeeye.png')}
+            <Pressable
+              onPress={() => {
+                onChangePasswordSecure(!passwordSecure);
+                console.log(passwordSecure);
+              }}
               style={{
                 position: 'absolute',
                 top: 0,
-                right: en ? '0%' : '0%',
-              }}></Image>
+                right: en ? '5%' : '0%',
+              }}>
+              <Image source={require('../assets/closeeye.png')}></Image>
+            </Pressable>
           </View>
         </View>
       </View>
       <View
-        style={[styles.password, {flexDirection: en ? 'row' : 'row-reverse'}]}>
+        style={
+          isInputFocused.confirmpassword
+            ? [
+                styles.password,
+                {flexDirection: en ? 'row' : 'row-reverse'},
+                {backgroundColor: 'white', borderColor: '#007236'},
+              ]
+            : [styles.password, , {flexDirection: en ? 'row' : 'row-reverse'}]
+        }>
         <Image
           source={require('../assets/lock.png')}
           style={{
@@ -163,7 +224,12 @@ function PasswordScreen({navigation}) {
           }}></Image>
         <View
           style={{flex: 1, marginStart: en ? 20 : 0, marginEnd: en ? 0 : 20}}>
-          <Text style={[styles.label, {color: '#B7B7B7'}]}>
+          <Text
+            style={
+              isInputFocused.confirmpassword
+                ? [styles.labelfocused]
+                : [styles.label]
+            }>
             {strings.confirmpassword}
           </Text>
           <View
@@ -176,12 +242,23 @@ function PasswordScreen({navigation}) {
               onChangeText={onChangeconfirmPassword}
               value={confirmPassword}
               placeholder={strings.setpassword}
-              secureTextEntry
+              onBlur={() => handleInputBlur('confirmpassword')}
+              onFocus={() => handleInputFocus('confirmpassword')}
+              secureTextEntry={confirmPasswordSecure}
               placeholderTextColor={!dark ? 'black' : '#B7B7B7'}
             />
-            <Image
-              source={require('../assets/closeeye.png')}
-              style={{marginStart: 'auto'}}></Image>
+            <Pressable
+              onPress={() => {
+                onChangeConfirmPasswordSecure(!confirmPasswordSecure);
+                console.log(confirmPasswordSecure);
+              }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: en ? '5%' : '0%',
+              }}>
+              <Image source={require('../assets/closeeye.png')}></Image>
+            </Pressable>
           </View>
         </View>
       </View>
@@ -375,17 +452,18 @@ const firstStyles = props =>
     },
     password: {
       marginTop: 20,
-      maxHeight: 65,
 
       padding: 0,
       flexDirection: 'row',
       borderRadius: 10,
       borderStyle: 'solid',
       borderWidth: 1.5,
-      borderColor: '#007236',
+      borderColor: 'rgba(255, 255, 255, 0.5)',
+      backgroundColor: '#FFFFFF',
+
       alignItems: 'center',
       margin: 0,
-      backgroundColor: props.colors.card,
+      flex: 0.17,
     },
     login: {
       backgroundColor: '#007236',
@@ -403,11 +481,19 @@ const firstStyles = props =>
     },
 
     label: {
-      fontSize: 14,
+      fontSize: 15,
       fontWeight: '700',
-      color: 'white',
+      color: '#B7B7B7',
       marginTop: 11,
     },
+    labelfocused: {
+      fontSize: 15,
+      color: '#007236',
+      fontWeight: '700',
+
+      marginTop: 11,
+    },
+
     passwordcheck: {
       fontWeight: '400',
       fontSize: 15,

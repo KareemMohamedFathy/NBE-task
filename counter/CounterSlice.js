@@ -4,6 +4,7 @@ import drawerstrings from '../components/Language/AuthNames';
 
 const initialState = {
   value: 'en',
+  phoneno: '010',
 };
 
 export const counterSlice = createSlice({
@@ -18,13 +19,17 @@ export const counterSlice = createSlice({
       state.value = state.value == 'ar' ? 'en' : 'ar';
       strings.setLanguage(state.value);
     },
-    incrementByAmount: (state, action) => {
-      state.value += action.payload;
+    updateMyPhoneno: (state, action) => {
+      state.phoneno = action.payload;
+    },
+    getMyPhoneno: state => {
+      return state.phoneno;
     },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const {changeLanguage} = counterSlice.actions;
+export const {changeLanguage, updateMyPhoneno, getMyPhoneno} =
+  counterSlice.actions;
 
 export default counterSlice.reducer;

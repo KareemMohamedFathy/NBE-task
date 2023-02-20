@@ -19,6 +19,7 @@ import {
   StatusBar,
   Dimensions,
   FlatList,
+  ScrollView,
 } from 'react-native';
 import BackButton from '../components/ui/BackButton';
 import Button from '../components/ui/Button';
@@ -33,7 +34,7 @@ import History from '../components/Home/History';
 import {useSelector} from 'react-redux';
 import strings from '../components/Language/AuthNames';
 
-function HomeScreen({navigation, route}) {
+function HomeScreen({navigation}) {
   const currentL = useSelector(state => state.counter.value);
   const en = currentL === 'en';
 
@@ -71,10 +72,10 @@ function HomeScreen({navigation, route}) {
   useLayoutEffect(() => {
     const parent = navigation.getParent('test');
     parent.getParent().setOptions({
-      tabBarItemStyle: {
-        backgroundColor: isFocused ? '#007236' : '#202933',
-        margin: 5,
-        borderRadius: 16,
+      tabBarLabelStyle: {
+        textAlign: 'center',
+        marginBottom: 8,
+        fontSize: 11,
       },
     });
   });
@@ -91,101 +92,105 @@ function HomeScreen({navigation, route}) {
     );
   }
   return (
-    <View style={styles.container}>
-      <HomeBanner />
-      <Pressable onPress={setModal}>
-        <View style={styles.balance}>
-          <ImageBackground
-            source={require('../assets/Home/test.png')}
-            style={{paddingBottom: 40}}>
-            <View
-              style={[
-                styles.balanceheader,
-                {flexDirection: en ? 'row' : 'row-reverse'},
-              ]}>
-              <Text style={{color: 'white'}}>{strings.balance}</Text>
-              <Image
-                source={require('../assets/Home/smallfingerprint.png')}
-                style={{marginStart: 'auto'}}></Image>
-            </View>
-            <View style={styles.showbalance}>
-              <Text style={styles.showbalancetext}>
-                {fingerprintV ? mybalance : strings.showbalance}
-              </Text>
-            </View>
-          </ImageBackground>
+    <ScrollView horizontal={false}>
+      <View style={styles.container}>
+        <HomeBanner />
+        <Pressable onPress={setModal}>
+          <View style={styles.balance}>
+            <ImageBackground
+              source={require('../assets/Home/test.png')}
+              style={{paddingBottom: 40}}>
+              <View
+                style={[
+                  styles.balanceheader,
+                  {flexDirection: en ? 'row' : 'row-reverse'},
+                ]}>
+                <Text style={{color: 'white'}}>{strings.balance}</Text>
+                <Image
+                  source={require('../assets/Home/smallfingerprint.png')}
+                  style={{marginStart: 'auto'}}></Image>
+              </View>
+              <View style={styles.showbalance}>
+                <Text style={styles.showbalancetext}>
+                  {fingerprintV ? mybalance : strings.showbalance}
+                </Text>
+              </View>
+            </ImageBackground>
+          </View>
+        </Pressable>
+        <View
+          style={[
+            styles.manageacoount,
+            {flexDirection: en ? 'row' : 'row-reverse'},
+          ]}>
+          <SmallCard
+            bstyle={{
+              backgroundColor: '#00C97426',
+              borderRadius: 12,
+              marginTop: 25,
+            }}
+            imagepath={require('../assets/Home/accounts.png')}
+            outertext={strings.accounts}></SmallCard>
+          <SmallCard
+            onPress={goToCardsScreen}
+            bstyle={{
+              backgroundColor: '#00ADF826',
+              borderRadius: 12,
+              marginTop: 25,
+            }}
+            imagepath={require('../assets/Home/cards.png')}
+            outertext={strings.cards}></SmallCard>
+
+          <SmallCard
+            bstyle={{
+              backgroundColor: '#F6A72126',
+              borderRadius: 12,
+              marginTop: 25,
+            }}
+            imagepath={require('../assets/Home/utilities.png')}
+            outertext={strings.utilities}></SmallCard>
+
+          <SmallCard
+            bstyle={{
+              backgroundColor: '#FF002E26',
+              borderRadius: 12,
+              marginTop: 25,
+            }}
+            imagepath={require('../assets/Home/history.png')}
+            outertext={strings.history}></SmallCard>
         </View>
-      </Pressable>
-      <View
-        style={[
-          styles.manageacoount,
-          {flexDirection: en ? 'row' : 'row-reverse'},
-        ]}>
-        <SmallCard
-          bstyle={{
-            backgroundColor: '#00C97426',
-            borderRadius: 12,
-            marginTop: 25,
-          }}
-          imagepath={require('../assets/Home/accounts.png')}
-          outertext={strings.accounts}></SmallCard>
-        <SmallCard
-          onPress={goToCardsScreen}
-          bstyle={{
-            backgroundColor: '#00ADF826',
-            borderRadius: 12,
-            marginTop: 25,
-          }}
-          imagepath={require('../assets/Home/cards.png')}
-          outertext={strings.cards}></SmallCard>
+        <View
+          style={{
+            flexDirection: en ? 'row' : 'row-reverse',
 
-        <SmallCard
-          bstyle={{
-            backgroundColor: '#F6A72126',
-            borderRadius: 12,
+            alignItems: 'center',
             marginTop: 25,
-          }}
-          imagepath={require('../assets/Home/utilities.png')}
-          outertext={strings.utilities}></SmallCard>
-
-        <SmallCard
-          bstyle={{
-            backgroundColor: '#FF002E26',
-            borderRadius: 12,
-            marginTop: 25,
-          }}
-          imagepath={require('../assets/Home/history.png')}
-          outertext={strings.history}></SmallCard>
+            justifyContent: 'space-between',
+          }}>
+          <Text style={styles.sendmoney}>{strings.sendmoney}</Text>
+          <Text style={styles.viewall}>{strings.viewallusers}</Text>
+        </View>
+        <View style={{}}>
+          <ScrollView horizontal={false}>
+            <FlatList
+              data={users}
+              renderItem={renderUsersItem}
+              keyExtractor={item => item.username}
+              horizontal={true}
+              inverted={en ? false : true}
+              style={{}}
+            />
+          </ScrollView>
+        </View>
+        <History />
+        <View>
+          <HomeModal
+            modalon={visible}
+            onPress={isVisible}
+            onSecure={getFingerPrint}></HomeModal>
+        </View>
       </View>
-      <View
-        style={{
-          flexDirection: en ? 'row' : 'row-reverse',
-
-          alignItems: 'center',
-          marginTop: 25,
-          justifyContent: 'space-between',
-        }}>
-        <Text style={styles.sendmoney}>{strings.sendmoney}</Text>
-        <Text style={styles.viewall}>{strings.viewallusers}</Text>
-      </View>
-      <View style={{}}>
-        <FlatList
-          data={users}
-          renderItem={renderUsersItem}
-          keyExtractor={item => item.username}
-          horizontal={true}
-          inverted={en ? false : true}
-          style={{}}
-        />
-      </View>
-      <History />
-      <View>
-        <HomeModal
-          modalon={visible}
-          onPress={isVisible}
-          onSecure={getFingerPrint}></HomeModal>
-      </View>
-    </View>
+    </ScrollView>
   );
 }
 function useGlobalStyles() {

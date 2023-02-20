@@ -7,7 +7,7 @@ function BackButton({destination}) {
   const en = currentL === 'en';
   const {dark} = useTheme();
   return (
-    <Pressable onPress={() => navigation.navigate(destination)}>
+    <Pressable onPress={() => navigation.goBack()}>
       <Image
         source={
           !dark

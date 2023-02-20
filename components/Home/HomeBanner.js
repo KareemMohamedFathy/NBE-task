@@ -37,7 +37,7 @@ function HomeBanner() {
           source={
             localThemes.dark
               ? require('../../assets/Home/menudark.png')
-              : require('../../assets/Home/menudark.png')
+              : require('../../assets/Home/menu.png')
           }></Image>
       </Pressable>
       <Image

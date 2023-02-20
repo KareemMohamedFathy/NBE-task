@@ -40,7 +40,6 @@ function AirPayScreen({navigation}) {
     setAirPayFailedVisible(true);
   }
   function tryAgain() {
-    console.log('hi');
     setVisible(!visible);
     setAirPayFailedVisible(false);
   }
@@ -62,16 +61,15 @@ function AirPayScreen({navigation}) {
     setAirPayModal();
   }
   function chooseCard(img) {
-    console.log('hayo');
     setChoosenCard(img);
     setisCard('true');
   }
   useEffect(() => {
     navigation.setOptions({
-      tabBarItemStyle: {
-        backgroundColor: isFocused ? '#007236' : '#202933',
-        margin: 5,
-        borderRadius: 16,
+      tabBarLabelStyle: {
+        textAlign: 'center',
+        marginBottom: 8,
+        fontSize: 11,
       },
     });
   });

@@ -16,8 +16,10 @@ import {useMemo} from 'react/cjs/react.development';
 import BackButton from '../components/ui/BackButton';
 import Button from '../components/ui/Button';
 import MyDefaultTheme from '../mythemes/MyDefaultTheme';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import strings from '../components/Language/AuthNames';
+import {updateMyPhoneno} from '../counter/CounterSlice';
+import CustomTextInput from '../components/ui/CustomTextInput';
 
 function RegisterScreen({navigation}) {
   const currentL = useSelector(state => state.counter.value);
@@ -26,8 +28,23 @@ function RegisterScreen({navigation}) {
   const localThemes = useTheme();
   const [mobile, onChangeMobile] = useState('');
   const styles = useGlobalStyles();
+  const dispatch = useDispatch();
+  const [isInputFocused, setIsInputFocused] = useState({
+    mobileno: false,
+  });
 
+  const handleInputFocus = textinput => {
+    setIsInputFocused({
+      [textinput]: true,
+    });
+  };
+  const handleInputBlur = textinput => {
+    setIsInputFocused({
+      [textinput]: false,
+    });
+  };
   function goToConfirm() {
+    dispatch(updateMyPhoneno(mobile));
     navigation.navigate('ConfirmMobile', {
       mobileNum: mobile,
     });
@@ -56,7 +73,16 @@ function RegisterScreen({navigation}) {
       <Text style={styles.mobileNumEnter}>{strings.mobilenoetner}</Text>
 
       <View
-        style={[styles.password, {flexDirection: en ? 'row' : 'row-reverse'}]}>
+        style={[
+          isInputFocused.mobileno
+            ? [
+                styles.textinput,
+                {flexDirection: en ? 'row' : 'row-reverse'},
+                {backgroundColor: 'white', borderColor: '#007236'},
+              ]
+            : [styles.textinput, , {flexDirection: en ? 'row' : 'row-reverse'}],
+          {flexDirection: en ? 'row' : 'row-reverse'},
+        ]}>
         <Image
           source={require('../assets/mobile.png')}
           style={{
@@ -66,19 +92,25 @@ function RegisterScreen({navigation}) {
             marginEnd: en ? 0 : 20,
           }}></Image>
         <View style={{marginHorizontal: 15}}>
-          <Text style={[styles.label, {color: '#007236'}, {}]}>
+          <Text
+            style={
+              isInputFocused.mobileno ? [styles.labelfocused] : [styles.label]
+            }>
             {strings.mobileno}
           </Text>
           <TextInput
-            style={styles.inputpassword}
+            style={styles.input}
             onChangeText={onChangeMobile}
             value={mobile}
             placeholder="+20 101 131 5412"
             placeholderTextColor={localThemes.colors.text}
             keyboardType={'phone-pad'}
+            onBlur={() => handleInputBlur('mobileno')}
+            onFocus={() => handleInputFocus('mobileno')}
           />
         </View>
       </View>
+
       <View
         style={{flexDirection: 'column', marginTop: 'auto', marginBottom: 25}}>
         <Button onPress={goToConfirm}>{strings.next}</Button>
@@ -127,20 +159,44 @@ const firstStyles = props =>
       color: '#B7B7B7',
       marginTop: 5,
     },
-    password: {
+    label: {
+      fontWeight: '700',
+
+      fontSize: 16,
+      color: 'black',
+      marginHorizontal: 23,
+      marginTop: 11,
+    },
+
+    labelfocused: {
+      fontSize: 16,
+      color: '#007236',
+      fontWeight: '700',
+
+      marginHorizontal: 23,
+      marginTop: 11,
+    },
+    textinput: {
       marginTop: 20,
-      maxHeight: 65,
 
       padding: 0,
-      backgroundColor: props.colors.backgroundColor,
       flexDirection: 'row',
-      borderRadius: 10,
+      borderRadius: 12,
       borderStyle: 'solid',
       borderWidth: 1.5,
-      borderColor: '#007236',
+      borderColor: 'rgba(255, 255, 255, 0.5)',
+      backgroundColor: '#FFFFFF',
+
       alignItems: 'center',
       margin: 0,
-      backgroundColor: props.colors.card,
+      flex: 0.17,
+    },
+
+    input: {
+      fontSize: 16,
+      fontWeight: '400',
+      color: 'black',
+      marginStart: 20,
     },
     login: {
       backgroundColor: props.colors.backgroundColor,
@@ -149,18 +205,6 @@ const firstStyles = props =>
       minWidth: '70%',
     },
 
-    inputpassword: {
-      fontSize: 16,
-      fontWeight: '400',
-      color: props.colors.text,
-    },
-
-    label: {
-      fontSize: 14,
-      fontWeight: '700',
-      color: 'white',
-      marginTop: 11,
-    },
     footer: {
       marginTop: 25,
       fontWeight: '400',

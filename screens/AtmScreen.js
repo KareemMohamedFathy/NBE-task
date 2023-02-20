@@ -1,4 +1,4 @@
-import {useIsFocused} from '@react-navigation/native';
+import {useIsFocused, useTheme} from '@react-navigation/native';
 import {useEffect} from 'react';
 import {
   StyleSheet,
@@ -15,13 +15,15 @@ import Button from '../components/ui/Button';
 
 function AtmScreen({navigation}) {
   const isFocused = useIsFocused();
+  const localThemes = useTheme();
 
   useEffect(() => {
     navigation.setOptions({
-      tabBarItemStyle: {
-        backgroundColor: isFocused ? '#007236' : '#202933',
-        margin: 5,
-        borderRadius: 16,
+      tabBarLabelStyle: {
+        textAlign: 'center',
+        marginBottom: 8,
+        color: isFocused ? '#FFFFFF' : '#B7B7B7',
+        fontSize: 11,
       },
     });
   });

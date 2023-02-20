@@ -18,6 +18,7 @@ import {
   StatusBar,
   Dimensions,
   FlatList,
+  ScrollView,
 } from 'react-native';
 import MyDefaultTheme from '../../mythemes/MyDefaultTheme';
 import {useSelector} from 'react-redux';
@@ -67,11 +68,13 @@ function History() {
         <Text style={[styles.sendmoney]}>{strings.history}</Text>
         <Text style={styles.viewall}>{strings.viewalltransactions}</Text>
       </View>
-      <FlatList
-        data={history}
-        renderItem={renderUserHistory}
-        keyExtractor={item => item.username}
-      />
+      <ScrollView horizontal={true} contentContainerStyle={{flex: 1}}>
+        <FlatList
+          data={history}
+          renderItem={renderUserHistory}
+          keyExtractor={item => item.username}
+        />
+      </ScrollView>
     </>
   );
 }

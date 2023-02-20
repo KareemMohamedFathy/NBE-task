@@ -23,6 +23,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {useTheme} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
 import {changeLanguage} from '../counter/CounterSlice';
+import auth from '@react-native-firebase/auth';
 
 function LogInScreen({navigation}) {
   const currentL = useSelector(state => state.counter.value);
@@ -42,15 +43,47 @@ function LogInScreen({navigation}) {
       setbgColor('rgba(0, 0, 0, 0.6)');
     }
   }
+  function signIn(email, password) {
+    auth()
+      .signInWithEmailAndPassword(email + '@nbe.com', password)
+      .then(() => {
+        console.log('User signed in');
+        navigation.navigate('Root');
+      })
+      .catch(error => {
+        console.log('Password or email is incorrect');
+
+        if (error.code === 'auth/invalid-email') {
+          console.log('That email address is invalid!');
+        }
+      });
+  }
   function gotoRegister() {
     navigation.navigate('Register');
   }
   function gotoHome() {
     navigation.navigate('Root');
+
+    //signIn(email, password);
   }
   function changeL() {
     dispatch(changeLanguage());
   }
+  const [isInputFocused, setIsInputFocused] = useState({
+    password: false,
+    email: false,
+  });
+
+  const handleInputFocus = textinput => {
+    setIsInputFocused({
+      [textinput]: true,
+    });
+  };
+  const handleInputBlur = textinput => {
+    setIsInputFocused({
+      [textinput]: false,
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -79,10 +112,19 @@ function LogInScreen({navigation}) {
           </View>
           <View style={[styles.form]}>
             <View
-              style={[
-                styles.email,
-                {flexDirection: en ? 'row' : 'row-reverse'},
-              ]}>
+              style={
+                isInputFocused.email
+                  ? [
+                      styles.email,
+                      {flexDirection: en ? 'row' : 'row-reverse'},
+                      {backgroundColor: 'white', borderColor: '#007236'},
+                    ]
+                  : [
+                      styles.email,
+                      ,
+                      {flexDirection: en ? 'row' : 'row-reverse'},
+                    ]
+              }>
               <Image
                 source={require('../assets/@.png')}
                 style={{
@@ -90,23 +132,47 @@ function LogInScreen({navigation}) {
                   marginBottom: 'auto',
                   marginStart: en ? 24 : 5,
                   marginEnd: en ? 0 : 24,
+                  tintColor: !isInputFocused.email ? '#FFFFFF' : '#B7B7B7',
                 }}></Image>
               <View style={{flex: 1}}>
-                <Text style={styles.label}>{strings.userName}</Text>
+                <Text
+                  style={
+                    isInputFocused.email
+                      ? [styles.labelfocused]
+                      : [styles.label]
+                  }>
+                  {strings.userName}
+                </Text>
                 <TextInput
-                  style={styles.inputemail}
+                  style={
+                    !isInputFocused.email
+                      ? [styles.inputemail, {color: 'white'}]
+                      : [styles.inputemail, {color: 'black'}]
+                  }
                   onChangeText={onChangeEmail}
                   value={email}
                   placeholder={strings.userPlaceHolder}
-                  placeholderTextColor={'white'}
+                  placeholderTextColor={
+                    isInputFocused.email ? 'black' : 'white'
+                  }
+                  onBlur={() => handleInputBlur('email')}
+                  onFocus={() => handleInputFocus('email')}
                 />
               </View>
             </View>
             <View
-              style={[
-                styles.password,
-                {flexDirection: en ? 'row' : 'row-reverse'},
-              ]}>
+              style={
+                isInputFocused.password
+                  ? [
+                      styles.password,
+                      {flexDirection: en ? 'row' : 'row-reverse'},
+                      {backgroundColor: 'white', borderColor: '#007236'},
+                    ]
+                  : [
+                      styles.password,
+                      {flexDirection: en ? 'row' : 'row-reverse'},
+                    ]
+              }>
               <Image
                 source={require('../assets/lock.png')}
                 style={{
@@ -114,28 +180,44 @@ function LogInScreen({navigation}) {
                   marginBottom: 'auto',
                   marginStart: en ? 24 : 5,
                   marginEnd: en ? 0 : 24,
+
+                  tintColor: !isInputFocused.password ? '#FFFFFF' : '#B7B7B7',
                 }}></Image>
               <View style={{flex: 1}}>
-                <Text style={[styles.label, {color: '#007236'}]}>
+                <Text
+                  style={
+                    isInputFocused.password
+                      ? [styles.labelfocused]
+                      : [styles.label]
+                  }>
                   {strings.password}
                 </Text>
                 <TextInput
-                  style={styles.inputpassword}
+                  style={
+                    !isInputFocused.password
+                      ? [styles.inputpassword, {color: 'white'}]
+                      : [styles.inputpassword, {color: 'black'}]
+                  }
                   onChangeText={onChangePassword}
                   value={password}
                   placeholder={strings.passwordPlaceHolder}
-                  placeholderTextColor={'black'}
+                  placeholderTextColor={
+                    isInputFocused.password ? 'black' : 'white'
+                  }
+                  onBlur={() => handleInputBlur('password')}
+                  onFocus={() => handleInputFocus('password')}
                 />
               </View>
             </View>
           </View>
-          <View style={{flex: 1}}>
+          <View style={{flex: 1.5}}>
             <View
               style={{
                 flexDirection: en ? 'row' : 'row-reverse',
                 marginLeft: 20,
                 marginTop: 15,
                 alignItems: 'center',
+                flex: 1,
               }}>
               <CheckBox
                 disabled={false}
@@ -162,6 +244,7 @@ function LogInScreen({navigation}) {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 marginEnd: 16,
+                flex: 2,
               }}>
               <Button
                 bstyle={styles.login}
@@ -177,7 +260,7 @@ function LogInScreen({navigation}) {
                   style={{marginStart: 'auto'}}></Image>
               </Pressable>
             </View>
-            <View style={{alignItems: 'center', marginTop: 15}}>
+            <View style={{alignItems: 'center', marginTop: 15, flex: 1}}>
               <Pressable onPress={gotoRegister}>
                 <Text style={{fontSize: 18, color: 'white'}}>
                   {strings.noAccount}{' '}
@@ -225,7 +308,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   outercontainer: {
-    flex: 10,
+    flex: 1,
     paddingTop: statusBarHeight + 5,
     paddingHorizontal: 25,
   },
@@ -265,10 +348,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 16,
+    flex: 0.4,
   },
 
   appheader: {
-    minHeight: '35%',
+    flex: 1.7,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'column',
@@ -281,8 +365,24 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   form: {
-    flex: 1,
+    flex: 1.4,
   },
+  label: {
+    fontSize: 16,
+    color: 'white',
+    marginHorizontal: 23,
+    marginTop: 11,
+    fontWeight: '700',
+  },
+
+  labelfocused: {
+    fontSize: 16,
+    color: 'green',
+    marginHorizontal: 23,
+    marginTop: 11,
+    fontWeight: '700',
+  },
+
   email: {
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     flexDirection: 'row',
@@ -293,21 +393,16 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.5)',
     alignItems: 'center',
   },
-  label: {
-    fontSize: 16,
-    color: 'white',
-    marginHorizontal: 23,
-    marginTop: 11,
-  },
   inputemail: {
+    flex: 1,
     fontSize: 16,
     fontWeight: '400',
     color: 'white',
     marginStart: 20,
   },
+
   password: {
     marginTop: 20,
-    maxHeight: 65,
 
     padding: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
@@ -315,10 +410,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderStyle: 'solid',
     borderWidth: 1.5,
-    borderColor: '#007236',
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+
     alignItems: 'center',
     margin: 0,
-    backgroundColor: 'white',
+    flex: 1,
   },
 
   inputpassword: {
@@ -337,7 +433,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    flex: 0.45,
+    flex: 0.6,
     marginTop: 20,
     marginHorizontal: -25,
   },

@@ -1,5 +1,5 @@
 import {useTheme, DarkTheme, DefaultTheme} from '@react-navigation/native';
-import {useLayoutEffect, useState} from 'react';
+import {useCallback, useEffect, useLayoutEffect, useState} from 'react';
 import {useMemo} from 'react/cjs/react.development';
 import MyDarkTheme from '../mythemes/MyDarkTheme';
 import {
@@ -19,12 +19,35 @@ import VerifyText from '../components/ui/VerifyText';
 import MyDefaultTheme from '../mythemes/MyDefaultTheme';
 import {useSelector} from 'react-redux';
 import strings from '../components/Language/AuthNames';
+import MissonCompleteModal from '../components/MissionCompleteModal';
 
 function ConfirmMobileScreen({navigation, route}) {
-  const {mobileNum} = route.params ? route.params : '';
+  const [timer, setTimer] = useState(60);
+  const timeOutCallback = useCallback(
+    () => setTimer(currTimer => currTimer - 1),
+    [],
+  );
+  useEffect(() => {
+    timer > 0 && setTimeout(timeOutCallback, 1000);
+  }, [timer, timeOutCallback]);
+  const {mobileNum, source} = route.params ? route.params : '';
   function goToPassword() {
     navigation.navigate('Password');
   }
+  const [visible, setVisible] = useState(false);
+  function isVisible() {
+    setVisible(!visible);
+  }
+  function setModal() {
+    setVisible(true);
+  }
+  function onFinish() {
+    setVisible(!visible);
+    navigation.navigate(
+      source === 'AddBeneficiaries' ? 'MyBeneficiaries' : 'Transfer',
+    );
+  }
+
   const styles = useGlobalStyles();
   const currentL = useSelector(state => state.counter.value);
   const en = currentL === 'en';
@@ -37,7 +60,11 @@ function ConfirmMobileScreen({navigation, route}) {
           flexDirection: en ? 'row' : 'row-reverse',
           justifyContent: 'space-between',
         }}>
-        <BackButton destination="Register" />
+        <BackButton
+          destination={
+            source == 'AddBeneficiaries' ? 'AddBeneficiaries' : 'Register'
+          }
+        />
         <View>
           <Image
             source={
@@ -50,7 +77,9 @@ function ConfirmMobileScreen({navigation, route}) {
         </View>
       </View>
 
-      <Text style={styles.mobileNum}>{strings.verification}</Text>
+      <Text style={styles.mobileNum}>
+        {source === 'Transfer' ? strings.otp : strings.verification}
+      </Text>
       <Text style={styles.mobileNumEnter}>
         {strings.enterverification}
         {mobileNum}
@@ -64,13 +93,25 @@ function ConfirmMobileScreen({navigation, route}) {
       </View>
       <Text style={styles.mobileNumEnter}>{strings.nocode}</Text>
       <Text style={[styles.mobileNum, {marginTop: 5}]}>
-        {strings.reqnewcode}
+        {strings.reqnewcode + ' 00:' + timer}
       </Text>
 
       <View
         style={{flexDirection: 'column', marginTop: 'auto', marginBottom: 25}}>
-        <Button onPress={goToPassword}>{strings.submit}</Button>
+        <Button
+          onPress={() => {
+            source === 'AddBeneficiaries' || source === 'Transfer'
+              ? setModal()
+              : goToPassword();
+          }}>
+          {strings.submit}
+        </Button>
       </View>
+      <MissonCompleteModal
+        modalon={visible}
+        onPress={isVisible}
+        onFinish={onFinish}
+        source={source}></MissonCompleteModal>
     </View>
   );
 }
