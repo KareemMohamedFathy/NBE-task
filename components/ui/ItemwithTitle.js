@@ -21,7 +21,7 @@ function ItemwithTitle({title, subtitle, img, endimage, flex}) {
       <Image
         source={img}
         resizeMode="contain"
-        style={{resizeMode: 'cover', marginEnd: 5}}
+        style={{resizeMode: 'contain', marginEnd: 5}}
       />
       <View style={{flexDirection: 'column'}}>
         <Text style={{fontSize: 18, color: '#1C2437', marginStart: 8}}>
@@ -34,7 +34,11 @@ function ItemwithTitle({title, subtitle, img, endimage, flex}) {
       <Image
         source={endimage}
         resizeMode="contain"
-        style={{resizeMode: 'cover', marginStart: 'auto', alignSelf: 'center'}}
+        style={{
+          resizeMode: 'contain',
+          marginStart: 'auto',
+          alignSelf: 'center',
+        }}
       />
     </View>
   );

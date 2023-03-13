@@ -3,7 +3,7 @@ import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import {useSelector} from 'react-redux';
 import {GlobalStyles} from '../../constants/styles';
 
-function UserInfo() {
+function UserInfo({name, email, mobileno}) {
   const {dark} = useTheme();
   const localThemes = useTheme();
 
@@ -52,7 +52,7 @@ function UserInfo() {
               fontWeight: '700',
               marginStart: 4,
             }}>
-            Ahmad Sami
+            {name}
           </Text>
         </View>
 
@@ -71,7 +71,7 @@ function UserInfo() {
               fontSize: 15,
               color: '#B7B7B7',
             }}>
-            +20 101 131 5412
+            {mobileno}
           </Text>
         </View>
 
@@ -84,7 +84,7 @@ function UserInfo() {
             source={require('../../assets/Benf/money.png')}
             resizeMode="contain"
             style={{
-              resizeMode: 'cover',
+              resizeMode: 'contain',
               marginEnd: 5,
             }}
           />
@@ -94,7 +94,7 @@ function UserInfo() {
               fontSize: 15,
               color: '#B7B7B7',
             }}>
-            theahmadsami@gmail.com
+            {email}
           </Text>
         </View>
       </View>

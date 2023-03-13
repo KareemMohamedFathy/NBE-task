@@ -26,7 +26,7 @@ function AtmScreen({navigation}) {
         fontSize: 11,
       },
     });
-  });
+  }, []);
 
   return (
     <View style={styles.container}>

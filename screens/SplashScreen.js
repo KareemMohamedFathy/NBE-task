@@ -24,7 +24,7 @@ function SplashScreen({navigation}) {
         borderRadius: 16,
       },
     });
-  });
+  }, []);
   const timerRef = useRef(null); // you can also import useRef() directly from 'react'
 
   useEffect(() => {

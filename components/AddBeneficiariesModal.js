@@ -59,7 +59,7 @@ function AddBeneficiariesModal(props) {
                       ? require('../assets/darklogo.png')
                       : require('../assets/logogreen.png')
                   }
-                  style={{resizeMode: 'cover'}}
+                  style={{resizeMode: 'contain'}}
                 />
               </View>
             </View>

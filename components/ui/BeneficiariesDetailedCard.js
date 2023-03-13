@@ -29,7 +29,7 @@ function BeneficiariesDetailedCard({itemdata, onPress, onOptions}) {
             : 'rgba(255, 255, 255, 1)',
         }}>
         <Image
-          source={itemdata.item.img}
+          source={{uri: itemdata.item.image}}
           resizeMode="contain"
           style={{width: 60, height: 60, resizeMode: 'cover'}}
         />
@@ -53,7 +53,7 @@ function BeneficiariesDetailedCard({itemdata, onPress, onOptions}) {
                 fontSize: 18,
                 fontWeight: '700',
               }}>
-              Ahmad Sami
+              {itemdata.item.firstname}
             </Text>
             <Pressable
               style={{
@@ -68,7 +68,7 @@ function BeneficiariesDetailedCard({itemdata, onPress, onOptions}) {
                 source={require('../../assets/Benf/options.png')}
                 resizeMode="contain"
                 style={{
-                  resizeMode: 'cover',
+                  resizeMode: 'contain',
                   marginEnd: 5,
                 }}
               />
@@ -91,7 +91,7 @@ function BeneficiariesDetailedCard({itemdata, onPress, onOptions}) {
                 fontSize: 15,
                 color: '#B7B7B7',
               }}>
-              +20 101 131 5412
+              {itemdata.item.phoneno}
             </Text>
           </View>
 

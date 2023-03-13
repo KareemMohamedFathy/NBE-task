@@ -45,6 +45,7 @@ import {changeLanguage} from './counter/CounterSlice';
 import SplashScreen from './screens/SplashScreen';
 import {black} from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
 import AddBeneficiariesScreen from './screens/AddBeneficiariesScreen';
+import {SheetProvider} from 'react-native-actions-sheet';
 const Drawer = createDrawerNavigator();
 
 function App() {
@@ -829,52 +830,54 @@ function App() {
   }
   return (
     <Provider store={store}>
-      <NavigationContainer
-        theme={scheme === 'dark' ? MyDarkTheme : MyDefaultTheme}>
-        <StatusBar backgroundColor="transparent" translucent={true} />
-        <Stack.Navigator initialRouteName="Splash">
-          <Stack.Screen
-            name="Splash"
-            component={SplashScreen}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="LogIn"
-            component={LogInScreen}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="Finished"
-            component={FinishScreen}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="Register"
-            component={RegisterScreen}
-            options={{headerShown: false}}
-          />
+      <SheetProvider>
+        <NavigationContainer
+          theme={scheme === 'dark' ? MyDarkTheme : MyDefaultTheme}>
+          <StatusBar backgroundColor="transparent" translucent={true} />
+          <Stack.Navigator initialRouteName="Splash">
+            <Stack.Screen
+              name="Splash"
+              component={SplashScreen}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name="LogIn"
+              component={LogInScreen}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name="Finished"
+              component={FinishScreen}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name="Register"
+              component={RegisterScreen}
+              options={{headerShown: false}}
+            />
 
-          <Stack.Screen
-            name="ConfirmMobile"
-            component={ConfirmMobileScreen}
-            options={{headerShown: false}}
-          />
+            <Stack.Screen
+              name="ConfirmMobile"
+              component={ConfirmMobileScreen}
+              options={{headerShown: false}}
+            />
 
-          <Stack.Screen
-            name="Password"
-            component={PasswordScreen}
-            options={{
-              headerShown: false,
-            }}
-          />
+            <Stack.Screen
+              name="Password"
+              component={PasswordScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
 
-          <Stack.Screen
-            name="Root"
-            component={Root}
-            options={{headerShown: false}}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+            <Stack.Screen
+              name="Root"
+              component={Root}
+              options={{headerShown: false}}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SheetProvider>
     </Provider>
   );
 }

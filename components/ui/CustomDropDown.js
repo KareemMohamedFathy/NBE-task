@@ -34,9 +34,7 @@ function CustomDropDown({children, onPress, bstyle, textstyle, img, label}) {
           en ? '043 - Water Way Mall' : ' 043 - فرع واتر واي مول ',
           en ? '045 - City Stars Mall' : ' 045 - فرع سيتي ستارز ',
         ]}
-        onSelect={(selectedItem, index) => {
-          console.log(selectedItem, index);
-        }}
+        onSelect={(selectedItem, index) => {}}
         renderDropdownIcon={() => {
           return <Image source={require('../../assets/Benf/down.png')} />;
         }}

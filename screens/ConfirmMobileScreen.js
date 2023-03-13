@@ -45,6 +45,9 @@ function ConfirmMobileScreen({navigation, route}) {
     setVisible(!visible);
     navigation.navigate(
       source === 'AddBeneficiaries' ? 'MyBeneficiaries' : 'Transfer',
+      {
+        mobileNum: 'sss',
+      },
     );
   }
 

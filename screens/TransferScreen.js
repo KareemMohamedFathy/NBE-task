@@ -1,5 +1,7 @@
 import {useIsFocused, useTheme} from '@react-navigation/native';
+import axios from 'axios';
 import {useEffect, useMemo, useState} from 'react';
+import Moment from 'moment';
 import {
   StyleSheet,
   View,
@@ -21,17 +23,30 @@ import Button from '../components/ui/Button';
 import CustomDropDown from '../components/ui/CustomDropDown';
 import MyDarkTheme from '../mythemes/MyDarkTheme';
 import MyDefaultTheme from '../mythemes/MyDefaultTheme';
+import {firebase} from '@react-native-firebase/auth';
+import {Formik} from 'formik';
+import CustomTextInput from '../components/ui/CustomTextInput';
 
-function TransferScreen({navigation}) {
+function TransferScreen({navigation, route}) {
   const isFocused = useIsFocused();
   const localThemes = useTheme();
+  const BACKEND_URL = 'https://react-task-c2c86-default-rtdb.firebaseio.com';
+  const {benid} = route.params ? route.params : '';
 
   const currentL = useSelector(state => state.counter.value);
   const [transferamount, setTransferamount] = useState('');
+  const uid = firebase.auth().currentUser?.uid;
   const [transferreason, setTransferreason] = useState('');
 
   const en = currentL === 'en';
   const styles = useGlobalStyles();
+  let transfer = {
+    amount: transferamount,
+    title: transferreason,
+    date: Moment(new Date()).format('DD-MM-YYYY'),
+    sender: uid ? uid : 'me',
+    reciever: benid,
+  };
 
   const [isInputFocused, setIsInputFocused] = useState({
     transferamount: false,
@@ -50,9 +65,13 @@ function TransferScreen({navigation}) {
   };
   const windowHeight = Dimensions.get('window').height;
   function gotoconfirm() {
+    storeTransfer();
     navigation.navigate('ConfirmMobile', {
       source: 'Transfer',
     });
+  }
+  function storeTransfer() {
+    axios.post(BACKEND_URL + '/Transfer.json', transfer);
   }
 
   return (
@@ -82,81 +101,62 @@ function TransferScreen({navigation}) {
         <CustomDropDown label={strings.typeoftransfer} />
         <CustomDropDown label={strings.transferfrom} />
         <CustomDropDown label={strings.transferto} />
-        <View style={{flex: 1}}>
-          <View
-            style={[
-              !isInputFocused.transferamount
-                ? styles.password
-                : [
-                    styles.password,
-                    {
-                      borderRadius: 10,
-                      borderStyle: 'solid',
-                      borderWidth: 1.5,
-                      borderColor: '#007236',
-                    },
-                  ],
-              {
-                flexDirection: 'column',
-              },
-            ]}>
-            <Text
-              style={
-                isInputFocused.transferamount
-                  ? [styles.label, {color: '#007236'}]
-                  : [styles.label, {color: 'black'}]
-              }>
-              {strings.amountotransfer}
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder={strings.amount}
-              value={transferamount}
-              onChangeText={setTransferamount}
-              placeholderTextColor={localThemes.colors.primary}
-              onFocus={() => handleInputFocus('transferamount')}
-              onBlur={() => handleInputBlur('transferamount')}
-            />
-          </View>
-          <View
-            style={[
-              !isInputFocused.transferreason
-                ? styles.password
-                : [
-                    styles.password,
-                    {
-                      borderRadius: 10,
-                      borderStyle: 'solid',
-                      borderWidth: 1.5,
-                      borderColor: '#007236',
-                    },
-                  ],
-              {
-                flexDirection: 'column',
-              },
-            ]}>
-            <Text
-              style={
-                isInputFocused.transferreason
-                  ? [styles.label, {color: '#007236'}]
-                  : [styles.label, {color: 'black'}]
-              }>
-              {strings.reasontotransfer}
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder={strings.reasontotransfer}
-              value={transferreason}
-              onChangeText={setTransferreason}
-              placeholderTextColor={localThemes.colors.primary}
-              onFocus={() => handleInputFocus('transferreason')}
-              onBlur={() => handleInputBlur('transferreason')}
-            />
-            <Button bstyle={{marginTop: 24}} onPress={() => gotoconfirm()}>
-              {strings.transfer}{' '}
-            </Button>
-          </View>
-        </View>
+        <Formik
+          initialValues={{
+            transferreason: '',
+            transferamount: '',
+          }}
+          onSubmit={values => gotoconfirm(values)}>
+          {({handleChange, handleBlur, handleSubmit, values}) => (
+            <View style={{flex: 1}}>
+              <CustomTextInput
+                label={strings.amount}
+                value={values.transferamount}
+                onChangeText={handleChange('transferamount')}
+                placeholder={strings.amountotransfer}
+              />
+
+              <View
+                style={[
+                  !isInputFocused.transferreason
+                    ? styles.password
+                    : [
+                        styles.password,
+                        {
+                          borderRadius: 10,
+                          borderStyle: 'solid',
+                          borderWidth: 1.5,
+                          borderColor: '#007236',
+                        },
+                      ],
+                  {
+                    flexDirection: 'column',
+                  },
+                ]}>
+                <Text
+                  style={
+                    isInputFocused.transferreason
+                      ? [styles.label, {color: '#007236'}]
+                      : [styles.label, {color: 'black'}]
+                  }>
+                  {strings.reasontotransfer}
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder={strings.reasontotransfer}
+                  value={transferreason}
+                  onChangeText={setTransferreason}
+                  placeholderTextColor={localThemes.colors.primary}
+                  onFocus={() => handleInputFocus('transferreason')}
+                  onBlur={() => handleInputBlur('transferreason')}
+                />
+                <Button bstyle={{marginTop: 24}} onPress={() => gotoconfirm()}>
+                  {strings.transfer}{' '}
+                </Button>
+              </View>
+            </View>
+          )}
+        </Formik>
       </View>
     </ScrollView>
   );

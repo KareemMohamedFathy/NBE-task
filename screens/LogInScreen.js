@@ -24,6 +24,7 @@ import {useTheme} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
 import {changeLanguage} from '../counter/CounterSlice';
 import auth from '@react-native-firebase/auth';
+import {SheetManager} from 'react-native-actions-sheet';
 
 function LogInScreen({navigation}) {
   const currentL = useSelector(state => state.counter.value);
@@ -35,20 +36,18 @@ function LogInScreen({navigation}) {
   const [bgColor, setbgColor] = useState('rgba(0, 0, 0, 0.6)');
   const [visible, setVisible] = useState(false);
   function setModal() {
-    setVisible(true);
-  }
-  function isVisible() {
-    setVisible(!visible);
-    if (visible) {
-      setbgColor('rgba(0, 0, 0, 0.6)');
-    }
+    SheetManager.hide('FingerPrintModal');
+    SheetManager.hide('FingerPrintModal');
+
+    SheetManager.show('FingerPrintModal');
   }
   function signIn(email, password) {
     auth()
       .signInWithEmailAndPassword(email + '@nbe.com', password)
-      .then(() => {
-        console.log('User signed in');
-        navigation.navigate('Root');
+      .then(cred => {
+        navigation.navigate('Root', {
+          id: cred.uid,
+        });
       })
       .catch(error => {
         console.log('Password or email is incorrect');
@@ -62,9 +61,10 @@ function LogInScreen({navigation}) {
     navigation.navigate('Register');
   }
   function gotoHome() {
-    navigation.navigate('Root');
-
-    //signIn(email, password);
+    if (email.length > 0 && password.length > 0) {
+      navigation.navigate('Root');
+      signIn(email, password);
+    }
   }
   function changeL() {
     dispatch(changeLanguage());
@@ -254,7 +254,10 @@ function LogInScreen({navigation}) {
                 ]}>
                 {strings.LogIn}
               </Button>
-              <Pressable onPress={setModal} style={{}}>
+              <Pressable
+                onPress={() => {
+                  setModal();
+                }}>
                 <Image
                   source={require('../assets/fingerprint.png')}
                   style={{marginStart: 'auto'}}></Image>
@@ -295,9 +298,7 @@ function LogInScreen({navigation}) {
           reducedTransparencyFallbackColor="white"
         />
       )} */}
-      <View>
-        <AppModal modalon={visible} onPress={isVisible}></AppModal>
-      </View>
+      <View></View>
     </View>
   );
 }

@@ -8,64 +8,60 @@ import MyDarkTheme from '../../mythemes/MyDarkTheme';
 import MyDefaultTheme from '../../mythemes/MyDefaultTheme';
 import strings from '../Language/AuthNames';
 
-function CustomTextInput({}) {
-  const [isInputFocused, setIsInputFocused] = useState({
-    mobileno: false,
-  });
-  const [mobile, onChangeMobile] = useState('');
-
+function CustomTextInput({label, value, onChangeText, placeholder}) {
   const currentL = useSelector(state => state.counter.value);
   const en = currentL === 'en';
+  const localThemes = useTheme();
   const styles = useGlobalStyles();
-
+  const [isInputFocused, setIsInputFocused] = useState({
+    label: false,
+  });
   const handleInputFocus = textinput => {
     setIsInputFocused({
       [textinput]: true,
     });
   };
   const handleInputBlur = textinput => {
+    console.log('bye');
     setIsInputFocused({
       [textinput]: false,
     });
   };
   return (
     <View
-      style={
-        isInputFocused.mobileno
-          ? [
-              styles.textinput,
-              {flexDirection: en ? 'row' : 'row-reverse'},
-              {backgroundColor: 'white', borderColor: '#007236'},
-            ]
-          : [styles.textinput, , {flexDirection: en ? 'row' : 'row-reverse'}]
-      }>
-      <Image
-        source={require('../../assets/mobile.png')}
-        style={{
-          marginTop: 'auto',
-          marginBottom: 'auto',
-          marginStart: en ? 24 : 5,
-          marginEnd: en ? 0 : 24,
-
-          tintColor: '#B7B7B7',
-        }}></Image>
-      <View style={{flex: 1}}>
-        <Text
-          style={
-            isInputFocused.mobileno ? [styles.labelfocused] : [styles.label]
-          }>
-          {strings.mobileno}
-        </Text>
-        <TextInput
-          style={[styles.input, {color: 'black'}]}
-          onChangeText={onChangeMobile}
-          value={mobile}
-          placeholder={strings.mobileno}
-          placeholderTextColor={'grey'}
-          onBlur={() => handleInputBlur('mobileno')}
-          onFocus={() => handleInputFocus('mobileno')}
-        />
-      </View>
+      style={[
+        !isInputFocused[label]
+          ? styles.password
+          : [
+              styles.password,
+              {
+                borderRadius: 10,
+                borderStyle: 'solid',
+                borderWidth: 1.5,
+                borderColor: '#007236',
+              },
+            ],
+        {
+          flexDirection: 'column',
+        },
+      ]}>
+      <Text
+        style={
+          isInputFocused[label]
+            ? [styles.label, {color: '#007236'}]
+            : [styles.label, {color: 'black'}]
+        }>
+        {label}
+      </Text>
+      <TextInput
+        style={styles.input}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={localThemes.colors.primary}
+        onFocus={() => handleInputFocus(label)}
+        onBlur={() => handleInputBlur(label)}
+      />
     </View>
   );
 }
@@ -97,20 +93,15 @@ const firstStyles = props =>
       marginHorizontal: 23,
       marginTop: 11,
     },
-    textinput: {
+    password: {
       marginTop: 20,
-
       padding: 0,
+      backgroundColor: props.colors.backgroundColor,
       flexDirection: 'row',
       borderRadius: 10,
-      borderStyle: 'solid',
-      borderWidth: 1.5,
-      borderColor: 'rgba(255, 255, 255, 0.5)',
-      backgroundColor: '#FFFFFF',
-
-      alignItems: 'center',
-      margin: 0,
-      flex: 0.2,
+      marginStart: 8,
+      flex: 1,
+      backgroundColor: props.colors.card,
     },
 
     input: {

@@ -2,16 +2,28 @@ import {useTheme} from '@react-navigation/native';
 import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import {GlobalStyles} from '../../constants/styles';
 
-function MediumCard({children, onPress, bstyle, textstyle, imagepath}) {
+function MediumCard({
+  children,
+  onPress,
+  bstyle,
+  textstyle,
+  imagepath,
+  benid,
+  itemData,
+}) {
   const {dark} = useTheme();
-
   return (
     <View style={styles.outercontainer}>
-      <Pressable onPress={onPress}>
+      <Pressable onPress={() => onPress(benid)}>
         <View style={[styles.bstyle, bstyle]}>
           <Image
-            source={imagepath}
-            style={{height: 40, resizeMode: 'cover', marginTop: 14}}></Image>
+            source={{uri: imagepath + ''}}
+            style={{
+              height: 40,
+              width: 40,
+              resizeMode: 'center',
+              marginTop: 14,
+            }}></Image>
           {children && (
             <Text style={[styles.textstyle, textstyle]}>{children}</Text>
           )}

@@ -27,42 +27,65 @@ import VerifyText from '../components/ui/VerifyText';
 import SmallCard from '../components/ui/SmallCard';
 import MediumCard from '../components/ui/MediumCard';
 import MyDefaultTheme from '../mythemes/MyDefaultTheme';
-import AppModal from '../components/AppModal';
 import HomeModal from '../components/HomeModal';
 import HomeBanner from '../components/Home/HomeBanner';
 import History from '../components/Home/History';
 import {useSelector} from 'react-redux';
 import strings from '../components/Language/AuthNames';
+import {firebase} from '@react-native-firebase/auth';
+import database from '@react-native-firebase/database';
+import axios from 'axios';
+import {get} from 'immer/dist/internal';
+import {SheetManager} from 'react-native-actions-sheet';
 
-function HomeScreen({navigation}) {
+function HomeScreen({navigation, route}) {
   const currentL = useSelector(state => state.counter.value);
   const en = currentL === 'en';
 
-  const users = [
-    {username: 'Hala', img: require('../assets/Home/hala.png')},
-    {username: 'Ayman', img: require('../assets/Home/ayman.png')},
-    {username: 'Alex', img: require('../assets/Home/alex.png')},
-    {username: 'Soha', img: require('../assets/Home/soha.png')},
-  ];
+  const [users, setUsers] = useState([]);
+  const BACKEND_URL = 'https://react-task-c2c86-default-rtdb.firebaseio.com';
+  const uid = firebase.auth().currentUser?.uid;
+  useEffect(() => {
+    getBenefeciaries();
+  }, []);
+  function getBenefeciaries() {
+    console.log(uid);
+    database()
+      .ref('Benefeciaries')
+      .orderByChild('myid')
+      .equalTo('' + uid)
+      .on('value', snapshot => {
+        const benf = [];
+        if (snapshot.exists) {
+          snapshot.forEach(response => {
+            const z = response.val();
+            z.benid = response.key;
+            benf.push(z);
+          });
+        }
+        console.log(benf.length);
+
+        setUsers(benf);
+      });
+
+    // const response = await axios.get(
+    //   BACKEND_URL + `/Benefeciaries.json?orderBy="myid"&equalTo="${uid}"`,
+    // );
+  }
 
   const isFocused = useIsFocused();
   const [visible, setVisible] = useState(false);
   const [mybalance, setMybalance] = useState('Press here to show balance');
   const [fingerprintV, setFingerPrintV] = useState(false);
-
   const styles = useGlobalStyles();
   const localThemes = useTheme();
   function goToCardsScreen() {
-    console.log('whu');
-
     navigation.navigate(strings.cards);
   }
-
-  function isVisible() {
-    setVisible(!visible);
-  }
   function setModal() {
-    setVisible(true);
+    SheetManager.show('FingerPrintHomeModal', {
+      payload: {value: getFingerPrint},
+    });
   }
   function getFingerPrint() {
     setMybalance('$2,374,654.25');
@@ -79,6 +102,12 @@ function HomeScreen({navigation}) {
       },
     });
   });
+  function gotoTransfer(id) {
+    console.log('the id' + id);
+    navigation.navigate('Transfer', {
+      benid: id,
+    });
+  }
 
   function renderUsersItem(itemData) {
     return (
@@ -86,8 +115,11 @@ function HomeScreen({navigation}) {
         bstyle={{
           backgroundColor: '#F8F9FC',
         }}
-        imagepath={itemData.item.img}>
-        {itemData.item.username}
+        imagepath={itemData.item.image}
+        benid={itemData.item.benid}
+        itemData={itemData.item}
+        onPress={gotoTransfer}>
+        {itemData.item.firstname}
       </MediumCard>
     );
   }
@@ -175,7 +207,7 @@ function HomeScreen({navigation}) {
             <FlatList
               data={users}
               renderItem={renderUsersItem}
-              keyExtractor={item => item.username}
+              keyExtractor={item => item.id}
               horizontal={true}
               inverted={en ? false : true}
               style={{}}
@@ -183,12 +215,7 @@ function HomeScreen({navigation}) {
           </ScrollView>
         </View>
         <History />
-        <View>
-          <HomeModal
-            modalon={visible}
-            onPress={isVisible}
-            onSecure={getFingerPrint}></HomeModal>
-        </View>
+        <View></View>
       </View>
     </ScrollView>
   );

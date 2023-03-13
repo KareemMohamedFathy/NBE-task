@@ -18,6 +18,10 @@ import Button from './ui/Button';
 import MyDefaultTheme from '../mythemes/MyDefaultTheme';
 import strings from './Language/AuthNames';
 import {useSelector} from 'react-redux';
+import ActionSheet, {
+  registerSheet,
+  SheetManager,
+} from 'react-native-actions-sheet';
 
 function HomeModal(props) {
   const a = props.modalon;
@@ -27,16 +31,16 @@ function HomeModal(props) {
   const en = currentL === 'en';
 
   return (
-    <Modal
-      transparent={true}
-      visible={props.modalon}
-      statusBarTranslucent={true}
-      style={{margin: 0}}>
-      <View style={styles.container}>
+    <ActionSheet containerStyle={styles.container}>
+      <View style={{}}>
         <Text style={styles.header}>{strings.fingerPrint}</Text>
         <Text style={styles.subheader}>{strings.fingerPrintLogin}</Text>
 
-        <Pressable onPress={props.onSecure}>
+        <Pressable
+          onPress={() => {
+            props.payload?.value();
+            SheetManager.hide('FingerPrintHomeModal');
+          }}>
           <Image
             source={
               localThemes.dark
@@ -48,14 +52,16 @@ function HomeModal(props) {
         <Text style={styles.footer}>{strings.touch}</Text>
 
         <Pressable
-          onPress={props.onPress}
-          style={{flex: 1, flexDirection: en ? 'row' : 'row-reverse'}}>
+          onPress={() => {
+            SheetManager.hide('FingerPrintHomeModal');
+          }}
+          style={{flexDirection: en ? 'row' : 'row-reverse'}}>
           <Text style={[styles.cancel, {flexDirection: 'row-reverse'}]}>
             {strings.cancel}
           </Text>
         </Pressable>
       </View>
-    </Modal>
+    </ActionSheet>
   );
 }
 function useGlobalStyles() {
@@ -100,12 +106,11 @@ const styles = props =>
     },
     container: {
       backgroundColor: props.colors.secondaryBackground,
-      maxHeight: '37%',
-      width: '100%',
-      flex: 1,
-      marginTop: 'auto',
+      minHeight: '37%',
       borderRadius: 18,
       paddingHorizontal: 25,
     },
   });
+
 export default HomeModal;
+registerSheet('FingerPrintHomeModal', HomeModal);

@@ -1,6 +1,7 @@
 import {useTheme} from '@react-navigation/native';
 import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import {GlobalStyles} from '../../constants/styles';
+import UserInfo from './UserInfo';
 
 function BeneficiariesGridCard({
   children,
@@ -8,18 +9,27 @@ function BeneficiariesGridCard({
   bstyle,
   textstyle,
   imagepath,
+  username,
+  itemData,
 }) {
   const {dark} = useTheme();
 
   return (
     <View style={styles.outercontainer}>
-      <Pressable onPress={onPress}>
+      <Pressable onPress={() => onPress(itemData)}>
         <View style={[styles.bstyle, bstyle]}>
           <Image
-            source={imagepath}
-            style={{height: 40, resizeMode: 'contain', marginTop: 14}}></Image>
-          {children && (
-            <Text style={[styles.textstyle, textstyle]}>{children}</Text>
+            source={{uri: itemData.item.image}}
+            style={{
+              height: 45,
+              resizeMode: 'center',
+              marginTop: 14,
+              width: 45,
+            }}></Image>
+          {username && (
+            <Text style={[styles.textstyle, textstyle]}>
+              {itemData.item.firstname}
+            </Text>
           )}
         </View>
       </Pressable>

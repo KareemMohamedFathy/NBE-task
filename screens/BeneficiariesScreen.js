@@ -26,49 +26,13 @@ import BeneficiariesGridCard from '../components/ui/BeneficiariesGridCard';
 import BeneficiariesDetailedCard from '../components/ui/BeneficiariesDetailedCard';
 import MissonCompleteModal from '../components/MissionCompleteModal';
 import BeneficiarisOptionsModal from '../components/BeneficiarisOptionsModal';
+import axios from 'axios';
+import {firebase} from '@react-native-firebase/auth';
 
-function BeneficiariesScreen({navigation}) {
-  let users = [
-    {
-      username: 'Hala',
-      img: require('../assets/Benf/user.png'),
-      mobileno: '0120301231',
-      balance: '84,232,2',
-    },
-    {
-      username: 'Ayman',
-      img: require('../assets/Benf/user.png'),
-      mobileno: '0120301231',
-      balance: '84,232,2',
-    },
-    {
-      username: 'Alex',
-      img: require('../assets/Benf/user.png'),
-      mobileno: '0120301231',
-      balance: '84,232,2',
-    },
-    {
-      username: 'Soha1',
-      img: require('../assets/Benf/user.png'),
-      mobileno: '0120301231',
-      balance: '84,232,2',
-    },
-    {
-      username: 'Soha2',
-      img: require('../assets/Benf/user.png'),
-      mobileno: '0120301231',
-      balance: '84,232,2',
-    },
-  ];
-  const history = [
-    {username: 'Flat Rent', price: '$892,48.0', date: '15-12-2021'},
-    {username: 'House Fixes', price: '$764,92.0', date: '15-12-2021'},
-    {username: 'New Laptop', price: '$764,92.0', date: '20-12-2021'},
-    {username: 'College Expenses', price: '$764,92.0', date: '20-12-2021'},
-  ];
-
+function BeneficiariesScreen({navigation, route}) {
   const [visible, setVisible] = useState(false);
   function isVisible() {
+    setIndex(-1);
     setVisible(!visible);
   }
   function setModal() {
@@ -79,7 +43,12 @@ function BeneficiariesScreen({navigation}) {
   const localThemes = useTheme();
   const styles = useGlobalStyles();
   const [numCols, setColumnNo] = useState(4);
+  const [history, setHistory] = useState([]);
+
   const [index, setIndex] = useState(-1);
+  const [optionsindex, setOptionsIndex] = useState(-1);
+  const [remove, setRemove] = useState(true);
+  const uid = firebase.auth().currentUser?.uid;
 
   const currentL = useSelector(state => state.counter.value);
   const en = currentL === 'en';
@@ -92,7 +61,32 @@ function BeneficiariesScreen({navigation}) {
   function gotoAddBen() {
     navigation.navigate('AddBeneficiaries');
   }
+  const BACKEND_URL = 'https://react-task-c2c86-default-rtdb.firebaseio.com';
+
+  async function getBenefeciaries() {
+    const response = await axios.get(
+      BACKEND_URL + `/Benefeciaries.json?orderBy="myid"&equalTo="${uid}"`,
+    );
+    const beneficiares = [];
+
+    for (const key in response.data) {
+      const benefeciarie = {
+        benid: key,
+        firstname: response.data[key].firstname,
+        lastname: response.data[key].lastname,
+        email: response.data[key].email,
+        branch: response.data[key].branch,
+        phoneno: response.data[key].phoneno,
+        accountnumber: response.data[key].accountnumber,
+        image: response.data[key].image,
+        myid: response.data[key].myid,
+      };
+      beneficiares.push(benefeciarie);
+    }
+    return beneficiares;
+  }
   function renderUserHistory(itemData) {
+    let amount = parseFloat(itemData.item.amount).toFixed(2);
     return (
       <View
         style={{
@@ -104,12 +98,19 @@ function BeneficiariesScreen({navigation}) {
           marginTop: 12,
         }}>
         <View style={{marginStart: 10}}>
-          <Text style={styles.historytitle}>{itemData.item.username}</Text>
+          <Text style={styles.historytitle}>{itemData.item.title}</Text>
           <Text style={styles.historydate}>{itemData.item.date}</Text>
         </View>
-        <Text style={styles.historyprice}>{itemData.item.price}</Text>
+        <Text style={styles.historyprice}>{amount + '$'}</Text>
       </View>
     );
+  }
+  function deleteBen(id) {
+    setIndex(-1);
+    setRemove(!remove);
+    isVisible();
+    setOptionsIndex(-1);
+    axios.delete(`${BACKEND_URL}/Benefeciaries/${id}.json`);
   }
   function renderUsersItem(itemData) {
     return (
@@ -117,29 +118,66 @@ function BeneficiariesScreen({navigation}) {
         bstyle={{
           backgroundColor: '#F8F9FC',
         }}
-        imagepath={itemData.item.img}>
-        {itemData.item.username}
-      </BeneficiariesGridCard>
+        itemData={itemData}
+        imagepath={itemData.item.img}
+        username={itemData.item.firstname}
+        onPress={transactionHistory}></BeneficiariesGridCard>
     );
   }
-  function transactionHistory(itemdata) {
+  async function transactionHistory(itemdata) {
+    if (renderMode === 'grid') changeRenderMode();
     setIndex(index !== -1 ? -1 : itemdata.index);
+    await getTransactions(itemdata.item.benid);
+    console.log('run');
+    console.log(history);
+    console.log('kuso');
   }
+  const [users, setUsers] = useState([]);
 
   function renderUsersDetailed(itemData) {
     return (
       <BeneficiariesDetailedCard
         itemdata={itemData}
         onPress={transactionHistory}
-        onOptions={onOptions}
+        onOptions={() => onOptions(itemData.index)}
       />
     );
   }
-  function onOptions() {
+  function onOptions(id) {
+    setOptionsIndex(id);
     setModal(true);
+  }
+  async function getTransactions(benid) {
+    console.log(benid + 'Hi');
+
+    const response = await axios.get(
+      BACKEND_URL + `/Transfer.json?orderBy="sender"&equalTo="${uid}"`,
+    );
+
+    const history = [];
+    for (const key in response.data) {
+      benkey = response.data[key].reciever;
+      if (benkey === benid) {
+        const transfer = {
+          benid: key,
+          amount: response.data[key].amount,
+          date: response.data[key].date,
+          title: response.data[key].title,
+        };
+        history.push(transfer);
+      }
+    }
+    console.log(history);
+    console.log('why no history');
+    setHistory(history);
   }
 
   useEffect(() => {
+    async function fetchBenefeciaries() {
+      setUsers(await getBenefeciaries());
+    }
+    fetchBenefeciaries();
+
     navigation.getParent().setOptions({
       tabBarLabelStyle: {
         textAlign: 'center',
@@ -147,8 +185,7 @@ function BeneficiariesScreen({navigation}) {
         fontSize: 11,
       },
     });
-  });
-
+  }, [route, remove]);
   return (
     <View style={styles.container}>
       <HomeBanner />
@@ -184,8 +221,7 @@ function BeneficiariesScreen({navigation}) {
       )}
 
       {users.length == 0 && (
-        <View
-          style={{flex: 20, alignItems: 'center', justifyContent: 'center'}}>
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
           <Image
             source={require('../assets/Benf/noben.png')}
             style={{marginStart: 10}}
@@ -205,26 +241,30 @@ function BeneficiariesScreen({navigation}) {
         </View>
       )}
 
-      <View style={{flex: index == -1 ? 15 : 1, marginTop: 15}}>
+      <View
+        style={{
+          flex: users.length < 1 ? 1 : index == -1 ? 10 : 1,
+          marginTop: 15,
+        }}>
         <FlatList
           data={index == -1 ? users : [users[index]]}
           renderItem={
             renderMode === 'grid' ? renderUsersItem : renderUsersDetailed
           }
           key={numCols}
-          keyExtractor={item => item.username}
+          keyExtractor={item => item.benid}
           horizontal={false}
           numColumns={numCols}
         />
       </View>
       {index !== -1 && (
-        <View style={{flex: 5}}>
+        <View style={{flex: 2}}>
           <Text style={styles.beneficiaries}>
             {strings.transactionshistory}
           </Text>
           {history.length == 0 && (
             <View
-              style={{flex: 5, alignItems: 'center', justifyContent: 'center'}}>
+              style={{flex: 2, alignItems: 'center', justifyContent: 'center'}}>
               <Image
                 source={require('../assets/Benf/transactions.png')}
                 style={{marginStart: 10}}
@@ -236,16 +276,34 @@ function BeneficiariesScreen({navigation}) {
           <FlatList
             data={history}
             renderItem={renderUserHistory}
-            keyExtractor={item => item.username}
+            keyExtractor={item => item.id}
           />
         </View>
       )}
+
       <BeneficiarisOptionsModal
         modalon={visible}
-        onPress={isVisible}></BeneficiarisOptionsModal>
+        benid={
+          index !== -1
+            ? users[index].id
+            : optionsindex === -1
+            ? 'no reciever'
+            : users[optionsindex].id
+        }
+        onPress={isVisible}
+        index={index}
+        bendata={
+          index !== -1
+            ? users[index]
+            : optionsindex === -1
+            ? 'no reciever'
+            : users[optionsindex]
+        }
+        onDelete={deleteBen}></BeneficiarisOptionsModal>
     </View>
   );
 }
+
 function useGlobalStyles() {
   const {dark} = useTheme();
   const {colors} = dark ? MyDarkTheme : MyDefaultTheme;
@@ -257,7 +315,7 @@ function useGlobalStyles() {
 const firstStyles = props =>
   StyleSheet.create({
     container: {
-      flex: 10,
+      flex: 1,
       backgroundColor: props.colors.background,
       paddingTop: 55,
       paddingHorizontal: 25,

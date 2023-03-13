@@ -1,5 +1,8 @@
 import {useIsFocused, useTheme} from '@react-navigation/native';
 import {useEffect, useMemo, useState} from 'react';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import {utils} from '@react-native-firebase/app';
+
 import {
   StyleSheet,
   View,
@@ -20,20 +23,25 @@ import Button from '../components/ui/Button';
 import MyDarkTheme from '../mythemes/MyDarkTheme';
 import MyDefaultTheme from '../mythemes/MyDefaultTheme';
 import {ScrollView} from 'react-native-gesture-handler';
+import {ref} from 'firebase/storage';
+import axios from 'axios';
+import storage from '@react-native-firebase/storage';
+import {firebase} from '@react-native-firebase/auth';
+import {Formik} from 'formik';
+import CustomTextInput from '../components/ui/CustomTextInput';
 
 function AddBeneficiariesScreen({navigation}) {
-  const isFocused = useIsFocused();
   const localThemes = useTheme();
   const currentL = useSelector(state => state.counter.value);
   const en = currentL === 'en';
   const styles = useGlobalStyles();
   const windowHeight = Dimensions.get('window').height;
-  const [firstname, setFirstname] = useState('');
-  const [lastname, setLastName] = useState('');
-  const [branch, setBranch] = useState('');
-  const [accountno, setAccountno] = useState('');
   const [phoneno, setPhoneno] = useState('');
-  const [email, setEmail] = useState('');
+  const [imageuri, setImageUri] = useState('');
+
+  const [response, setResponse] = useState('');
+
+  const uid = firebase.auth().currentUser?.uid;
 
   const [isInputFocused, setIsInputFocused] = useState({
     firstname: false,
@@ -55,11 +63,51 @@ function AddBeneficiariesScreen({navigation}) {
     });
   };
 
-  function confirmAddingBen() {
+  function confirmAddingBen(values) {
+    storeBenefeciary(values);
     navigation.navigate('ConfirmMobile', {
       source: 'AddBeneficiaries',
       mobileNum: phoneno,
     });
+  }
+  const BACKEND_URL = 'https://react-task-c2c86-default-rtdb.firebaseio.com';
+  async function storeBenefeciary(values) {
+    values.image = await uploadImage();
+    values.myid = uid;
+    axios.post(BACKEND_URL + '/Benefeciaries.json', values);
+  }
+  function openCamera() {
+    const options = {
+      storageOptions: {
+        mediatype: 'photo',
+        path: 'images',
+      },
+      includeBase64: true,
+    };
+    launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        console.log('cancel');
+      } else if (response.errorCode) {
+        console.log(response.errorMessage);
+      } else {
+        const source = {
+          uri: 'data:image/jpeg;base64,' + response.assets[0].base64,
+        };
+        setResponse(response);
+
+        setImageUri(source);
+      }
+    });
+  }
+  async function uploadImage() {
+    const reference = storage().ref('/image/' + response.assets[0].fileName);
+    const path = response.assets[0].uri;
+
+    const task = await reference.putFile(path);
+    const z = await storage()
+      .ref('/image/' + response.assets[0].fileName)
+      .getDownloadURL();
+    return z;
   }
 
   return (
@@ -93,240 +141,121 @@ function AddBeneficiariesScreen({navigation}) {
             />
           </View>
         </View>
-        <View style={styles.camera}>
-          <Image
-            source={require('../assets/Benf/camera.png')}
-            style={{
-              resizeMode: 'cover',
-              marginStart: en ? 6 : 0,
-              marginEnd: en ? 0 : 6,
-            }}
-          />
-        </View>
-        <View style={{flex: 1}}>
-          <View style={{flexDirection: en ? 'row' : 'row-reverse'}}>
-            <View
-              style={[
-                !isInputFocused.firstname
-                  ? styles.password
-                  : [
-                      styles.password,
-                      {
-                        borderRadius: 10,
-                        borderStyle: 'solid',
-                        borderWidth: 1.5,
-                        borderColor: '#007236',
-                      },
-                    ],
-                {
-                  flexDirection: 'column',
-                },
-              ]}>
-              <Text
-                style={
-                  isInputFocused.firstname
-                    ? [styles.label, {color: '#007236'}]
-                    : [styles.label, {color: 'black'}]
-                }>
-                {strings.firstname}
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder={strings.firstname}
-                value={firstname}
-                onChangeText={setFirstname}
-                placeholderTextColor={localThemes.colors.primary}
-                onFocus={() => handleInputFocus('firstname')}
-                onBlur={() => handleInputBlur('firstname')}
-              />
-            </View>
-            <View
-              style={[
-                !isInputFocused.lastname
-                  ? styles.password
-                  : [
-                      styles.password,
-                      {
-                        borderRadius: 10,
-                        borderStyle: 'solid',
-                        borderWidth: 1.5,
-                        borderColor: '#007236',
-                      },
-                    ],
-                {
-                  flexDirection: 'column',
+        <Pressable style={styles.camera} onPress={() => openCamera()}>
+          <View>
+            <Image
+              source={
+                imageuri === ''
+                  ? require('../assets/Benf/camera.png')
+                  : imageuri
+              }
+              style={{
+                height: 100,
+                width: 100,
+                resizeMode: 'cover',
+                marginStart: en ? 6 : 0,
+                marginEnd: en ? 0 : 6,
+              }}
+            />
+          </View>
+        </Pressable>
+        <Formik
+          initialValues={{
+            firstname: '',
+            lastname: '',
+            branch: '',
+            accountno: '',
+            phoneno: '',
+            email: '',
+            image: '',
+            myid: '',
+          }}
+          onSubmit={values => confirmAddingBen(values)}>
+          {({handleChange, handleBlur, handleSubmit, values}) => (
+            <View style={{flex: 1}}>
+              <View style={{flexDirection: en ? 'row' : 'ro-reverse'}}>
+                <CustomTextInput
+                  label={strings.firstname}
+                  value={values.firstname}
+                  onChangeText={handleChange('firstname')}
+                  placeholder={strings.firstname}
+                />
+                <CustomTextInput
+                  label={strings.lastname}
+                  value={values.lastname}
+                  onChangeText={handleChange('lastname')}
+                  placeholder={strings.lastname}
+                />
+              </View>
+              <View style={{backgroundColor: 'white', marginTop: 16}}>
+                <Text
+                  style={
+                    isInputFocused.branch
+                      ? [styles.label, {color: '#007236'}]
+                      : [styles.label, {color: 'black'}]
+                  }>
+                  {strings.bankbranch}
+                </Text>
+                <SelectDropdown
+                  defaultButtonText={en ? 'Select branch' : 'اختار فرع البنك'}
+                  data={[
+                    en ? '043 - Water Way Mall' : ' 043 - فرع واتر واي مول ',
+                    en ? '045 - City Stars Mall' : ' 045 - فرع سيتي ستارز ',
+                  ]}
+                  onSelect={(selectedItem, index) => {
+                    setBranch(selectedItem);
+                  }}
+                  renderDropdownIcon={() => {
+                    return (
+                      <Image source={require('../assets/Benf/down.png')} />
+                    );
+                  }}
+                  dropdownIconPosition={en ? 'right' : 'left'}
+                  buttonStyle={{
+                    width: '100%',
+                    backgroundColor: 'white',
+                    alignItems: en ? 'flex-end' : 'flex-start',
+                    flexDirection: 'column',
+                  }}
+                  buttonTextStyle={{
+                    fontSize: 16,
+                    alignSelf: en ? 'flex-start' : 'flex-end',
+                  }}
+                  onFocus={() => handleInputFocus('branch')}
+                  onBlur={() => handleInputFocus('branch')}
+                />
+              </View>
 
-                  marginStart: en ? 16 : 0,
-                  marginEnd: en ? 0 : 16,
-                },
-              ]}>
-              <Text
-                style={
-                  isInputFocused.lastname
-                    ? [styles.label, {color: '#007236'}]
-                    : [styles.label, {color: 'black'}]
-                }>
-                {strings.lastname}
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder={strings.lastname}
-                value={lastname}
-                onChangeText={setLastName}
-                placeholderTextColor={localThemes.colors.primary}
-                onFocus={() => handleInputFocus('lastname')}
-                onBlur={() => handleInputBlur('lastname')}
+              <CustomTextInput
+                label={strings.accountno}
+                value={values.accountno}
+                onChangeText={handleChange('accountno')}
+                placeholder={strings.accountno}
               />
+
+              <CustomTextInput
+                label={strings.phoneno}
+                value={values.phoneno}
+                onChangeText={handleChange('phoneno')}
+                placeholder={strings.phoneno}
+              />
+
+              <CustomTextInput
+                label={strings.email}
+                value={values.email}
+                onChangeText={handleChange('email')}
+                placeholder={strings.phoneno}
+              />
+
+              <Button
+                style={{flex: 1}}
+                bstyle={{marginVertical: 25}}
+                onPress={handleSubmit}>
+                {strings.addbeneficiar}
+              </Button>
             </View>
-          </View>
-          <View style={{backgroundColor: 'white', marginTop: 16}}>
-            <Text
-              style={
-                isInputFocused.branch
-                  ? [styles.label, {color: '#007236'}]
-                  : [styles.label, {color: 'black'}]
-              }>
-              {strings.bankbranch}
-            </Text>
-            <SelectDropdown
-              defaultButtonText={en ? 'Select branch' : 'اختار فرع البنك'}
-              data={[
-                en ? '043 - Water Way Mall' : ' 043 - فرع واتر واي مول ',
-                en ? '045 - City Stars Mall' : ' 045 - فرع سيتي ستارز ',
-              ]}
-              onSelect={(selectedItem, index) => {
-                console.log(selectedItem, index);
-              }}
-              renderDropdownIcon={() => {
-                return <Image source={require('../assets/Benf/down.png')} />;
-              }}
-              dropdownIconPosition={en ? 'right' : 'left'}
-              buttonStyle={{
-                width: '100%',
-                backgroundColor: 'white',
-                alignItems: en ? 'flex-end' : 'flex-start',
-                flexDirection: 'column',
-              }}
-              buttonTextStyle={{
-                fontSize: 16,
-                alignSelf: en ? 'flex-start' : 'flex-end',
-              }}
-              onFocus={() => handleInputFocus('branch')}
-              onBlur={() => handleInputFocus('branch')}
-            />
-          </View>
-          <View
-            style={[
-              !isInputFocused.accountno
-                ? styles.password
-                : [
-                    styles.password,
-                    {
-                      borderRadius: 10,
-                      borderStyle: 'solid',
-                      borderWidth: 1.5,
-                      borderColor: '#007236',
-                    },
-                  ],
-              {
-                flexDirection: 'column',
-              },
-            ]}>
-            <Text
-              style={
-                isInputFocused.accountno
-                  ? [styles.label, {color: '#007236'}]
-                  : [styles.label, {color: 'black'}]
-              }>
-              {strings.accountno}
-            </Text>
-            <TextInput
-              style={styles.input}
-              value={accountno}
-              onChangeText={setAccountno}
-              placeholder={strings.accountno}
-              placeholderTextColor={localThemes.colors.primary}
-              onFocus={() => handleInputFocus('accountno')}
-              onBlur={() => handleInputBlur('accountno')}
-            />
-          </View>
-          <View
-            style={[
-              !isInputFocused.phoneno
-                ? styles.password
-                : [
-                    styles.password,
-                    {
-                      borderRadius: 10,
-                      borderStyle: 'solid',
-                      borderWidth: 1.5,
-                      borderColor: '#007236',
-                    },
-                  ],
-              {
-                flexDirection: 'column',
-              },
-            ]}>
-            <Text
-              style={
-                isInputFocused.phoneno
-                  ? [styles.label, {color: '#007236'}]
-                  : [styles.label, {color: 'black'}]
-              }>
-              {strings.phoneno}
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder={strings.mobileno}
-              value={phoneno}
-              onChangeText={setPhoneno}
-              placeholderTextColor={localThemes.colors.primary}
-              onFocus={() => handleInputFocus('phoneno')}
-              onBlur={() => handleInputBlur('phoneno')}
-            />
-          </View>
-          <View
-            style={[
-              !isInputFocused.email
-                ? styles.password
-                : [
-                    styles.password,
-                    {
-                      borderRadius: 10,
-                      borderStyle: 'solid',
-                      borderWidth: 1.5,
-                      borderColor: '#007236',
-                    },
-                  ],
-              {
-                flexDirection: 'column',
-              },
-            ]}>
-            <Text
-              style={
-                isInputFocused.email
-                  ? [styles.label, {color: '#007236'}]
-                  : [styles.label, {color: 'black'}]
-              }>
-              {strings.email}
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder={strings.email}
-              placeholderTextColor={localThemes.colors.primary}
-              onFocus={() => handleInputFocus('email')}
-              onBlur={() => handleInputBlur('email')}
-              value={email}
-              onChangeText={setEmail}
-            />
-          </View>
-          <Button
-            style={{flex: 1}}
-            bstyle={{marginVertical: 25}}
-            onPress={() => confirmAddingBen()}>
-            {strings.addbeneficiar}
-          </Button>
-        </View>
+          )}
+        </Formik>
       </View>
     </ScrollView>
   );

@@ -1,5 +1,6 @@
 import {useIsFocused, useTheme} from '@react-navigation/native';
 import {useEffect, useMemo, useState} from 'react';
+import {DraxProvider, DraxScrollView, DraxView} from 'react-native-drax';
 import {
   StyleSheet,
   View,
@@ -28,7 +29,14 @@ function AirPayScreen({navigation}) {
   const isFocused = useIsFocused();
   const styles = useGlobalStyles();
   const localThemes = useTheme();
-  const [choosenCard, setChoosenCard] = useState(strings.dragcard);
+  const allcards = [
+    require('../assets/Home/redcarddark.png'),
+
+    require('../assets/Home/bluecarddark.png'),
+    require('../assets/Home/greencarddark.png'),
+  ];
+  const [choosenCard, setChoosenCard] = useState('x');
+
   const [isCard, setisCard] = useState(false);
   const [visible, setVisible] = useState(false);
 
@@ -72,77 +80,138 @@ function AirPayScreen({navigation}) {
         fontSize: 11,
       },
     });
-  });
+  }, [isCard]);
   return (
-    <View style={[styles.container]}>
-      <View
-        style={{
-          backgroundColor: 'rgba(28, 36, 55, 0.77)',
-          paddingHorizontal: 25,
-        }}></View>
-      <HomeBanner />
-      <ScrollView horizontal={true} style={{marginTop: 12}}>
-        <Pressable
-          onPress={() => chooseCard(require('../assets/Home/redcarddark.png'))}>
-          <Image
-            style={{marginEnd: 16}}
-            source={require('../assets/Home/redcarddark.png')}></Image>
-        </Pressable>
-        <Pressable
-          onPress={() =>
-            chooseCard(require('../assets/Home/bluecarddark.png'))
-          }>
-          <Image
-            style={{marginEnd: 16}}
-            source={require('../assets/Home/bluecarddark.png')}></Image>
-        </Pressable>
-        <Pressable
-          onPress={() =>
-            chooseCard(require('../assets/Home/greencarddark.png'))
-          }>
-          <Image
-            style={{marginEnd: 16}}
-            source={require('../assets/Home/greencarddark.png')}></Image>
-        </Pressable>
-      </ScrollView>
-      <View style={{flex: 4, marginBottom: 30}}>
+    <DraxProvider>
+      <View style={[styles.container]}>
         <View
           style={{
-            borderRadius: 27,
-            borderStyle: 'dashed',
-            borderColor: '#007236',
-            flex: 4,
-            borderWidth: 2,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          {!isCard && <Text style={styles.hold}>{choosenCard}</Text>}
-          {isCard && <Image source={choosenCard} style={{}} />}
-        </View>
-      </View>
+            backgroundColor: 'rgba(28, 36, 55, 0.77)',
+          }}></View>
+        <HomeBanner />
 
-      <View>
-        <ButtonWithImg
-          img={require('../assets/Home/smallfingerprint.png')}
-          bstyle={{marginVertical: 24}}
-          textstyle={{textAlign: 'center'}}
-          onPress={setModal}>
-          {strings.paynow}
-        </ButtonWithImg>
+        <DraxScrollView
+          showsHorizontalScrollIndicator={true}
+          overScrollMode={'always'}
+          horizontal={true}>
+          <DraxView
+            style={{marginVertical: 30, marginHorizontal: 20}}
+            onDragStart={() => {
+              console.log('start drag');
+            }}
+            payload="0">
+            <Pressable
+              onPress={() =>
+                chooseCard(require('../assets/Home/redcarddark.png'))
+              }>
+              <Image source={require('../assets/Home/redcarddark.png')}></Image>
+            </Pressable>
+          </DraxView>
+
+          <DraxView
+            onDragStart={() => {
+              console.log('start drag');
+            }}
+            style={{marginVertical: 30, marginHorizontal: 20}}
+            payload="1">
+            <Pressable
+              onPress={() =>
+                chooseCard(require('../assets/Home/bluecarddark.png'))
+              }>
+              <Image
+                style={{marginEnd: 16}}
+                source={require('../assets/Home/bluecarddark.png')}></Image>
+            </Pressable>
+          </DraxView>
+
+          <DraxView
+            onDragStart={() => {
+              console.log('start drag');
+            }}
+            payload="2"
+            style={{marginVertical: 30, marginHorizontal: 20}}>
+            <Pressable
+              onPress={() =>
+                chooseCard(require('../assets/Home/greencarddark.png'))
+              }>
+              <Image
+                style={{marginEnd: 16}}
+                source={require('../assets/Home/greencarddark.png')}></Image>
+            </Pressable>
+          </DraxView>
+        </DraxScrollView>
+        <View style={{flex: 5, marginBottom: 30}}>
+          <View
+            style={{
+              borderRadius: 27,
+              borderStyle: 'dashed',
+              borderColor: '#007236',
+              flex: 1,
+              borderWidth: 2,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            {!isCard && (
+              <DraxView
+                style={{height: 150}}
+                onReceiveDragEnter={({dragged: {payload}}) => {
+                  console.log(`hello ${payload}`);
+                }}
+                onReceiveDragExit={({dragged: {payload}}) => {
+                  console.log(`goodby ${allcards[1]}`);
+                }}
+                onReceiveDragDrop={({dragged: {payload}}) => {
+                  console.log(`receivedx ${allcards[1]}`);
+                  setChoosenCard(allcards[payload]);
+
+                  setisCard(true);
+                }}>
+                <Text style={styles.hold}>{choosenCard}</Text>
+              </DraxView>
+            )}
+            {isCard &&
+              (console.log('hi'),
+              (
+                <DraxView
+                  onReceiveDragEnter={({dragged: {payload}}) => {
+                    console.log(`hello ${payload}`);
+                  }}
+                  onReceiveDragExit={({dragged: {payload}}) => {
+                    console.log(`goodbyex ${payload}`);
+                  }}
+                  onReceiveDragDrop={({dragged: {payload}}) => {
+                    console.log(`receivedx ${payload}`);
+                    setChoosenCard(allcards[payload]);
+                  }}>
+                  <Image source={choosenCard} style={{}} />
+                </DraxView>
+              ))}
+          </View>
+        </View>
+
+        <View>
+          <ButtonWithImg
+            img={require('../assets/Home/smallfingerprint.png')}
+            bstyle={{marginVertical: 24}}
+            textstyle={{textAlign: 'center'}}
+            onPress={setModal}>
+            {strings.paynow}
+          </ButtonWithImg>
+        </View>
+        <HomeModal
+          modalon={visible}
+          onPress={isVisible}
+          onSecure={getFingerPrint}></HomeModal>
+        <AirPayWorkedModal
+          modalon={airpayVisible}
+          onPress={isAirPayVisible}
+          onSecure={getFingerPrint}></AirPayWorkedModal>
+        <AirPayFailed
+          modalon={airpayFailedVisible}
+          onPress={isAirPayFailedVisible}
+          onTryAgain={tryAgain}></AirPayFailed>
       </View>
-      <HomeModal
-        modalon={visible}
-        onPress={isVisible}
-        onSecure={getFingerPrint}></HomeModal>
-      <AirPayWorkedModal
-        modalon={airpayVisible}
-        onPress={isAirPayVisible}
-        onSecure={getFingerPrint}></AirPayWorkedModal>
-      <AirPayFailed
-        modalon={airpayFailedVisible}
-        onPress={isAirPayFailedVisible}
-        onTryAgain={tryAgain}></AirPayFailed>
-    </View>
+    </DraxProvider>
   );
 }
 function useGlobalStyles() {

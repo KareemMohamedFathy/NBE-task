@@ -21,9 +21,19 @@ import MyDefaultTheme from '../mythemes/MyDefaultTheme';
 import {useSelector} from 'react-redux';
 import strings from '../components/Language/AuthNames';
 import auth from '@react-native-firebase/auth';
+import {database} from '@react-native-firebase/database';
+import axios from 'axios';
 function PasswordScreen({navigation}) {
   const [password, onChangePassword] = useState('');
   const [confirmPassword, onChangeconfirmPassword] = useState('');
+  const BACKEND_URL = 'https://react-task-c2c86-default-rtdb.firebaseio.com';
+  const name = 'Chris';
+  function storeuser(phoneno, userid) {
+    axios.put(BACKEND_URL + `/Users/${userid}/.json`, {
+      phoneno: phoneno,
+      userid: userid,
+    });
+  }
 
   const [passwordSecure, onChangePasswordSecure] = useState(true);
   const [confirmPasswordSecure, onChangeConfirmPasswordSecure] = useState(true);
@@ -36,8 +46,9 @@ function PasswordScreen({navigation}) {
   function signUp(password) {
     auth()
       .createUserWithEmailAndPassword(phoneno + '@nbe.com', password)
-      .then(() => {
+      .then(data => {
         console.log('User account created & signed in!');
+        storeuser(phoneno, data.user.uid);
         navigation.navigate('Finished');
       })
       .catch(error => {
